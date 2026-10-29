@@ -47,7 +47,7 @@ a{color:var(--link)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 
 .app{height:100%;display:flex;flex-direction:column;overflow:hidden}
-.main{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative;overscroll-behavior-x:none}
+.main{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;-webkit-overflow-scrolling:touch;position:relative;overscroll-behavior-x:none}
 .main > .wrap{will-change:auto}
 .peek{position:absolute;left:0;right:0;pointer-events:none;background:var(--bg)}
 .peek > .wrap{margin-left:auto;margin-right:auto}
@@ -796,7 +796,7 @@ function tripList(sched,later,cur){
 function viewPrompts(){
   var list=vals(S.prompts).sort(function(a,b){return (b.at||'')<(a.at||'')?-1:1;});
   var body=list.length?'<div class="group">'+list.map(function(p){return '<div class="item" style="align-items:flex-start"><span class="grow"><span class="row" style="justify-content:space-between"><span style="font-weight:'+(p.read?500:700)+'">'+esc(p.title)+'</span><span class="small">'+esc(p.at?fmt(p.at.slice(0,10),true):'')+'</span></span><span style="font-size:14px;color:var(--muted2);white-space:pre-wrap">'+esc(p.body)+'</span></span>'+(p.read?'':'<span class="dot" style="color:var(--pin);margin-top:7px" aria-label="Unread"></span>')+'</div>';}).join('')+'</div>':'<div class="empty">Your daily prompts will collect here once they’re switched on. The first one arrives on your next production morning.</div>';
-  return '<div class="wrap" style="max-width:700px"><a class="back" href="#today" data-tip="Back to Today"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Today</a><header class="head" style="padding-top:0"><h1>Prompts</h1>'+(list.some(function(p){return !p.read;})?'<button class="btn quiet" type="button" data-act="readall" data-tip="Mark every prompt as read">Mark all read</button>':'')+'</header>'+body+'<div class="row small" style="justify-content:space-between;margin-top:8px"><span>Signed in as '+esc(S.session&&S.session.user?S.session.user.email:'')+'</span><button class="linkbtn" type="button" data-sact="signout">Sign out</button></div></div>';
+  return '<div class="wrap" style="max-width:700px"><a class="back" href="#today" data-tip="Back to Today"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Today</a><header class="head" style="padding-top:0"><h1>Prompts</h1>'+(list.some(function(p){return !p.read;})?'<button class="btn quiet" type="button" data-act="readall" data-tip="Mark every prompt as read">Mark all read</button>':'')+'</header>'+body+'<div class="row small" style="justify-content:space-between;margin-top:8px"><span>Signed in as '+esc(S.session&&S.session.user?S.session.user.email:'')+'</span><button class="linkbtn" type="button" data-sact="signout">Sign out</button><span class="small" style="margin-left:auto">App version '+APP_VERSION+'</span></div></div>';
 }
 
 /* quick add */
@@ -1027,7 +1027,16 @@ lastWide=wide();
 S.ui.who=getWho();
 render();
 start();
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+var APP_VERSION='5';
+/* Updates: check for a new version whenever the app comes back to the front, and reload into it automatically. */
+if('serviceWorker' in navigator){
+  var hadCtrl=!!navigator.serviceWorker.controller, reloading=false;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){if(!hadCtrl){hadCtrl=true;return;}if(reloading||PG.busy||S.ui.add)return;reloading=true;location.reload();});
+  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(reg){
+    document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')reg.update().catch(function(){});});
+    setInterval(function(){reg.update().catch(function(){});},30*60*1000);
+  }).catch(function(){});});
+}
 })();
 
 </script>
