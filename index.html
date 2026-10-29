@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#D9E4D2" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#141D17" media="(prefers-color-scheme: dark)"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off The Map"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#D9E4D2" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#141D17" media="(prefers-color-scheme: dark)"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off The Map"><link rel="manifest" href="manifest.webmanifest"><script>try{var otmT=localStorage.getItem("otm-theme");if(otmT==="light"||otmT==="dark")document.documentElement.setAttribute("data-theme",otmT);}catch(e){}</script><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <title>Off The Map Production</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -23,7 +23,7 @@
   --deep:#2E4536; --deep-fg:#EDE3C8; --deep-muted:#C9BC98;
   --accent:#4E7A5B; --accent-fg:#93C4A0; --on-accent:#FFFFFF;
   --blue:#36678C; --link:#93BDE0; --on-blue:#FFFFFF; --blue-soft:#D6E2EC;
-  --info-bg:#1F3242; --info-fg:#B4D0E6; --field:#2E281F;
+  --info-bg:#1F3242; --info-fg:#B4D0E6; --field:#263329;
   --red:#A84A3B; --pin:#C85A47; --pin-bright:#D0654F; --good:#7FA88A;
   --line:rgba(237,227,200,.12); --line-strong:rgba(237,227,200,.28); --scrim:rgba(0,0,0,.6);
   color-scheme:dark;
@@ -34,7 +34,7 @@
   --deep:#2E4536; --deep-fg:#EDE3C8; --deep-muted:#C9BC98;
   --accent:#4E7A5B; --accent-fg:#93C4A0; --on-accent:#FFFFFF;
   --blue:#36678C; --link:#93BDE0; --on-blue:#FFFFFF; --blue-soft:#D6E2EC;
-  --info-bg:#1F3242; --info-fg:#B4D0E6; --field:#2E281F;
+  --info-bg:#1F3242; --info-fg:#B4D0E6; --field:#263329;
   --red:#A84A3B; --pin:#C85A47; --pin-bright:#D0654F; --good:#7FA88A;
   --line:rgba(237,227,200,.12); --line-strong:rgba(237,227,200,.28); --scrim:rgba(0,0,0,.6);
   color-scheme:dark;
@@ -54,7 +54,7 @@ a{color:var(--link)}
 .wrap{padding-block:14px 104px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px;max-width:1100px;margin:0 auto;box-sizing:border-box}
 
 /* nav */
-.nav{order:2;flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--surface2);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.nav{order:2;flex:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:var(--surface2);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
 .nav .rail-top{display:none}
 .tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:52px;text-decoration:none;color:var(--muted);font-size:11px;line-height:1;border-radius:16px}
 .tab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -212,6 +212,15 @@ button.item,a.item{cursor:pointer}
 .daypick button[aria-pressed="true"]{background:var(--accent);color:#FFFFFF;border-color:var(--accent);font-weight:600}
 .toast{display:flex;align-items:center;gap:14px;max-width:calc(100% - 32px);box-sizing:border-box;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--on-ink);padding:10px 16px;border-radius:12px;font-size:14px;z-index:30}
 @media (min-width:600px){.toast{bottom:32px}}
+.set-in{min-height:40px;border-radius:10px;border:1px solid var(--line-strong);background:var(--field);color:var(--ink);padding:0 10px;font-size:15px;box-sizing:border-box;max-width:100%}
+.field .set-in{min-height:46px;font-size:16px;padding:0 12px}
+.item select.set-in{max-width:160px}
+.setsec{display:flex;flex-direction:column;gap:8px}
+.setcol{display:flex;flex-direction:column;gap:22px;min-width:0}
+.wkpick{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.wkpick button{min-height:42px;border-radius:10px;border:1px solid var(--line-strong);background:var(--field);color:var(--ink);font-size:13px;cursor:pointer;padding:0}
+.wkpick button[aria-pressed="true"]{background:var(--accent);color:#FFFFFF;border-color:var(--accent);font-weight:600}
+.nofab .fab{display:none}
 .toastbtn{flex:none;background:none;border:0;color:var(--on-ink);font:inherit;font-weight:700;text-decoration:underline;padding:6px 2px;min-height:36px;cursor:pointer}
 /* tips, ticker, day picking, calendar, owners */
 .tip{position:fixed;z-index:40;max-width:min(260px,calc(100vw - 16px));box-sizing:border-box;background:var(--ink);color:var(--on-ink);font-size:13px;line-height:1.35;padding:7px 10px;border-radius:10px;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.25)}
@@ -285,6 +294,7 @@ body.signedout .nav, body.signedout .fab{display:none}
     <a class="tab" href="#episodes" data-tab="episodes" data-tip="All scheduled episodes"><svg viewBox="0 0 24 24"><path d="M3 6h13v12H3zM16 10l5-3v10l-5-3"/></svg>Episodes</a>
     <a class="tab" href="#ideas" data-tab="ideas" data-tip="Every idea, and the queue of greenlit ones"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 7.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5"/></svg>Ideas</a>
     <a class="tab" href="#trips" data-tab="trips" data-tip="Shoot trips, b-roll lists and pack lists"><svg viewBox="0 0 24 24"><path d="M6 16a2 2 0 1 0 0 4a2 2 0 1 0 0-4M18 4a2 2 0 1 0 0 4a2 2 0 1 0 0-4M8 18h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></svg>Trips</a>
+    <a class="tab" href="#settings" data-tab="settings" data-tip="Notifications, reminders, display and account"><svg viewBox="0 0 24 24"><path d="M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</a>
   </nav>
   <main class="main" id="main"><div class="wrap"><div class="empty">Loading your production plan…</div></div></main>
 </div>
@@ -355,8 +365,8 @@ function unread(){return vals(S.prompts).filter(function(p){return !p.read;}).le
 
 /* ---------- data (Supabase) ---------- */
 var SB_URL='https://fbskjgluladhqocklyre.supabase.co', SB_KEY='sb_publishable_rJg33Y3FlK_3lCIPW1jQ8Q_VAjcEUXp';
-var COLS=['episodes','ideas','trips','tasks','prompts'], CACHE_KEY='otm-cache-v1', OUT_KEY='otm-outbox-v1', sb=null, chan=null, rT=null;
-S.session=null; S.signin={email:'',sent:false,busy:false,msg:''}; S.cachedAt=null; S.outbox=[]; S.saveErr=false;
+var COLS=['episodes','ideas','trips','tasks','prompts','reminders'], CACHE_KEY='otm-cache-v1', OUT_KEY='otm-outbox-v1', sb=null, chan=null, rT=null;
+S.session=null; S.signin={email:'',sent:false,busy:false,msg:''}; S.cachedAt=null; S.outbox=[]; S.saveErr=false; S.reminders={}; S.loadedAt=null;
 /* Changes are saved on the phone first (the outbox), then sent to Supabase in order and retried until they land. */
 function jm(a,b){if(!a||typeof a!=='object'||Array.isArray(a)||!b||typeof b!=='object'||Array.isArray(b))return b;var r=Object.assign({},a);Object.keys(b).forEach(function(k){r[k]=jm(r[k],b[k]);});return r;}
 function timed(p,ms){return Promise.race([p,new Promise(function(_,rej){setTimeout(function(){rej({timeout:true,message:'timeout'});},ms);})]);}
@@ -370,6 +380,7 @@ function applyOp(o){
   if(o.col==='config'){if(o.id==='settings')S.settings=o.k==='insert'?o.data:jm(S.settings||{},o.patch);return;}
   if(!S[o.col])return;
   if(o.k==='insert'){var v=Object.assign({},o.data);v.id=o.id;S[o.col][o.id]=v;}
+  else if(o.k==='delete'){delete S[o.col][o.id];}
   else if(S[o.col][o.id]){var m=jm(S[o.col][o.id],o.patch);m.id=o.id;S[o.col][o.id]=m;}
 }
 function reapply(col,id){S.outbox.forEach(function(o){if(!col||(o.col===col&&o.id===id))applyOp(o);});}
@@ -377,7 +388,7 @@ function saveOut(){try{localStorage.setItem(OUT_KEY,JSON.stringify(S.outbox));}c
 function loadOut(){try{S.outbox=JSON.parse(localStorage.getItem(OUT_KEY)||'[]')||[];}catch(e){S.outbox=[];}}
 function saveCache(){try{var c={at:new Date().toISOString(),settings:S.settings};COLS.forEach(function(k){c[k]=S[k];});localStorage.setItem(CACHE_KEY,JSON.stringify(c));}catch(e){}}
 function loadCache(){try{var c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');if(!c)return false;COLS.forEach(function(k){S[k]=c[k]||{};});S.settings=c.settings||null;S.cachedAt=c.at;return true;}catch(e){return false;}}
-function soon(){clearTimeout(rT);rT=setTimeout(function(){if((typeof PG!=='undefined'&&(PG.busy||PG.peek))||(typeof sw!=='undefined'&&sw&&sw.lock==='x')){soon();return;}if(S.ui.add)keepText();render();},120);}
+function soon(){clearTimeout(rT);rT=setTimeout(function(){if((typeof PG!=='undefined'&&(PG.busy||PG.peek))||(typeof sw!=='undefined'&&sw&&sw.lock==='x')){soon();return;}if(S.ui.add)keepText();if(S.ui.rem)keepRem();render();},120);}
 var loading=null;
 function loadAll(){
   if(loading)return loading;
@@ -387,6 +398,7 @@ function loadAll(){
     if(!all.length){var m=await timed(sb.rpc('otm_is_member'),15000);if(!m.error&&m.data===false){S.dbState='denied';render();return;}}
     COLS.forEach(function(k){S[k]={};}); S.settings=null; all.forEach(applyRow);
     reapply(); /* keep changes that haven't reached the server yet */
+    S.loadedAt=new Date().toISOString();
     S.dbState='ready'; S.cachedAt=null; saveCache(); render();
   })().finally(function(){loading=null;});
   return loading;
@@ -398,7 +410,7 @@ function connect(){
     if(!S.cachedAt)S.dbState='loading';
     render();
     try{await loadAll();}catch(e){S.dbState=navigator.onLine===false?'offline':(S.cachedAt?'stale':'error');render();retryLoadLater();flush();return;}
-    flush();
+    flush(); pushRefresh();
     if(chan)return;
     chan=sb.channel('otm-items').on('postgres_changes',{event:'*',schema:'public',table:'items'},function(p){
       if(p.eventType==='DELETE'){var o=p.old||{};if(o.col&&S[o.col])delete S[o.col][o.id];}
@@ -421,6 +433,8 @@ async function flush(){
       try{
         r=o.k==='insert'
           ? await timed(sb.from('items').upsert({col:o.col,id:o.id,data:o.data},{onConflict:'col,id'}),15000)
+          : o.k==='delete'
+          ? await timed(sb.from('items').delete().eq('col',o.col).eq('id',o.id),15000)
           : await timed(sb.rpc('otm_merge',{p_col:o.col,p_id:o.id,p_patch:o.patch}),15000);
         if(r.error)throw r.error;
       }catch(e){
@@ -511,7 +525,7 @@ document.getElementById('toast').addEventListener('click',function(ev){if(!ev.ta
 function setStage(id,st){var e=S.episodes[id];if(!e)return;e.stage=st;render();write('episodes/'+id,{stage:st});}
 
 /* ---------- views ---------- */
-function route(){var h=(location.hash||'#today').slice(1);if(h.indexOf('episode-')===0)return {v:'episode',id:h.slice(8)};if(h.indexOf('idea-')===0)return {v:'idea',id:h.slice(5)};if(['today','calendar','runway','episodes','ideas','queue','trips','prompts'].indexOf(h)<0)return {v:'today'};return {v:h};}
+function route(){var h=(location.hash||'#today').slice(1);if(h.indexOf('episode-')===0)return {v:'episode',id:h.slice(8)};if(h.indexOf('idea-')===0)return {v:'idea',id:h.slice(5)};if(['today','calendar','runway','episodes','ideas','queue','trips','prompts','settings'].indexOf(h)<0)return {v:'today'};return {v:h};}
 function wide(){return window.matchMedia('(min-width:600px)').matches;}
 
 function bell(){var n=unread();return '<a class="iconbtn" href="#prompts" aria-label="Prompts'+(n?', '+n+' new':'')+'" data-tip="Daily prompts from Claude'+(n?' · '+n+' unread':'')+'"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4"/></svg>'+(n?'<span class="badge">'+n+'</span>':'')+'</a>';}
@@ -650,8 +664,8 @@ function viewRunway(){
   var teamHtml=team().map(function(t){return '<div class="item" style="align-items:flex-start"><span class="grow"><span class="row" style="justify-content:space-between;gap:8px"><span style="font-weight:600">'+esc(t.name)+'</span>'+(t.share?'<span class="pill">'+esc(t.share)+'</span>':'')+'</span><span class="small">'+esc(t.does||'')+'</span></span></div>';}).join('');
   var P=(S.settings&&S.settings.prompts)||{};
   var pr=[['morning','Morning prompt','Mon, Thu, Fri, Sat · '+(P.morningTime||'08:00')],['night','Night-before heads-up','Sun and Wed · '+(P.nightTime||'19:00')],['behind','Behind-schedule alerts','Added to the morning prompt'],['weekly','Weekly review','Mondays, with the morning prompt']].map(function(p){var on=!!P[p[0]];return '<div class="item"><span class="grow"><span style="font-weight:500">'+p[1]+'</span><span class="small">'+esc(p[2])+'</span></span><button class="switch" type="button" role="switch" aria-checked="'+on+'" aria-label="'+p[1]+'" data-act="prompt" data-k="'+p[0]+'" data-tip="'+p[1]+' · '+esc(p[2])+'. Tap to turn '+(on?'off':'on')+'."><span class="trk"><span class="kn"></span></span></button></div>';}).join('');
-  var rt='<div style="display:flex;flex-direction:column;gap:18px;min-width:0"><section style="display:flex;flex-direction:column;gap:8px"><h2>Every week</h2><p class="sub" style="margin:0">Mon and Thu work the episode you are writing. Fri and Sat work the episode you are making. Every other Monday, the written episode moves to making and a new one starts.</p><div class="group">'+routine+'</div></section><section style="display:flex;flex-direction:column;gap:8px"><h2>Who does what</h2><div class="group">'+teamHtml+'</div></section><section style="display:flex;flex-direction:column;gap:8px"><h2>Prompts</h2><div class="group">'+pr+'</div><p class="small" style="margin:0 4px">Prompts arrive as Claude app notifications once the daily prompt task is switched on.</p></section></div>';
-  var body=w?'<div class="cols">'+line+rt+'</div>':('<div class="seg" role="tablist" aria-label="Runway view"><button type="button" role="tab" aria-selected="'+(tab==='line')+'" data-act="rtab" data-k="line" data-tip="Every episode on the production line and the release calendar">The line</button><button type="button" role="tab" aria-selected="'+(tab==='routine')+'" data-act="rtab" data-k="routine" data-tip="The weekly rhythm, who does what, and prompt settings">Routine & prompts</button></div>'+(tab==='line'?line:rt));
+  var rt='<div style="display:flex;flex-direction:column;gap:18px;min-width:0"><section style="display:flex;flex-direction:column;gap:8px"><h2>Every week</h2><p class="sub" style="margin:0">Mon and Thu work the episode you are writing. Fri and Sat work the episode you are making. Every other Monday, the written episode moves to making and a new one starts.</p><div class="group">'+routine+'</div></section><section style="display:flex;flex-direction:column;gap:8px"><h2>Who does what</h2><div class="group">'+teamHtml+'</div></section><section style="display:flex;flex-direction:column;gap:8px"><h2>Reminders</h2><a class="item" href="#settings" data-tip="Open Settings to turn on notifications and set reminder times"><span class="grow"><span style="font-weight:600">Notifications and reminder times</span><span class="small">'+esc(reminderSummary())+'</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></a></section></div>';
+  var body=w?'<div class="cols">'+line+rt+'</div>':('<div class="seg" role="tablist" aria-label="Runway view"><button type="button" role="tab" aria-selected="'+(tab==='line')+'" data-act="rtab" data-k="line" data-tip="Every episode on the production line and the release calendar">The line</button><button type="button" role="tab" aria-selected="'+(tab==='routine')+'" data-act="rtab" data-k="routine" data-tip="The weekly rhythm, who does what, and prompt settings">Routine</button></div>'+(tab==='line'?line:rt));
   return '<div class="wrap"><header class="head"><div><div class="eyebrow">'+target()+' banked before launch</div><h1>Runway</h1></div>'+bell()+'</header>'+statusBanner()+body+'</div>';
 }
 
@@ -799,7 +813,172 @@ function tripList(sched,later,cur){
 function viewPrompts(){
   var list=vals(S.prompts).sort(function(a,b){return (b.at||'')<(a.at||'')?-1:1;});
   var body=list.length?'<div class="group">'+list.map(function(p){return '<div class="item" style="align-items:flex-start"><span class="grow"><span class="row" style="justify-content:space-between"><span style="font-weight:'+(p.read?500:700)+'">'+esc(p.title)+'</span><span class="small">'+esc(p.at?fmt(p.at.slice(0,10),true):'')+'</span></span><span style="font-size:14px;color:var(--muted2);white-space:pre-wrap">'+esc(p.body)+'</span></span>'+(p.read?'':'<span class="dot" style="color:var(--pin);margin-top:7px" aria-label="Unread"></span>')+'</div>';}).join('')+'</div>':'<div class="empty">Your daily prompts will collect here once they’re switched on. The first one arrives on your next production morning.</div>';
-  return '<div class="wrap" style="max-width:700px"><a class="back" href="#today" data-tip="Back to Today"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Today</a><header class="head" style="padding-top:0"><h1>Prompts</h1>'+(list.some(function(p){return !p.read;})?'<button class="btn quiet" type="button" data-act="readall" data-tip="Mark every prompt as read">Mark all read</button>':'')+'</header>'+body+'<div class="row small" style="justify-content:space-between;margin-top:8px"><span>Signed in as '+esc(S.session&&S.session.user?S.session.user.email:'')+'</span><button class="linkbtn" type="button" data-sact="signout">Sign out</button><span class="small" style="margin-left:auto">App version '+APP_VERSION+'</span></div></div>';
+  return '<div class="wrap" style="max-width:700px"><a class="back" href="#today" data-tip="Back to Today"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Today</a><header class="head" style="padding-top:0"><h1>Prompts</h1>'+(list.some(function(p){return !p.read;})?'<button class="btn quiet" type="button" data-act="readall" data-tip="Mark every prompt as read">Mark all read</button>':'')+'</header>'+body+'<a class="linkbtn small" href="#settings" style="margin-top:8px">Reminder settings</a></div>';
+}
+
+/* ---------- settings ---------- */
+var VAPID_PUB='BL98o8ROEHRAVJvMANvAVuL76YOzwSh7vW7KC1UxArGIdyRomq4mbyCENXUyHxKRgaiglv5V_677VNqWjo822a0';
+var WEEK=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+function devGet(k,d){try{var v=localStorage.getItem('otm-'+k);return v==null?d:v;}catch(e){return d;}}
+function devSet(k,v){try{localStorage.setItem('otm-'+k,v);}catch(e){}}
+var THEME_META=null;
+function applyTheme(){
+  var t=devGet('theme','system'), r=document.documentElement;
+  if(t==='light'||t==='dark')r.setAttribute('data-theme',t);else r.removeAttribute('data-theme');
+  var ms=document.querySelectorAll('meta[name="theme-color"]');
+  if(!THEME_META)THEME_META=[].map.call(ms,function(m){return m.getAttribute('content');});
+  [].forEach.call(ms,function(m,i){m.setAttribute('content',t==='light'?'#D9E4D2':t==='dark'?'#141D17':THEME_META[i]);});
+}
+function P(){return (S.settings&&S.settings.prompts)||{};}
+function t12(t){if(!t)return '';var h=+t.slice(0,2),m=t.slice(3,5);return ((h%12)||12)+(m==='00'?'':':'+m)+(h<12?' am':' pm');}
+function reminderSummary(){
+  var p=P(), on=[];
+  if(p.morning)on.push('mornings '+t12(p.morningTime||'08:00'));
+  if(p.night)on.push('night before '+t12(p.nightTime||'19:00'));
+  if(p.weekly)on.push((p.weeklyDay||'Sun')+' review '+t12(p.weeklyTime||'18:00'));
+  var dev=S.push.sub?'On for this phone':'Off on this phone';
+  return dev+(on.length?' · '+on.join(', '):' · no reminders set');
+}
+/* web push on this device */
+S.push={supported:('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window),perm:('Notification' in window)?Notification.permission:'default',sub:null,row:null,busy:false,msg:''};
+function b64u(s){var p='='.repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,'+').replace(/_/g,'/')),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
+function deviceName(){var u=navigator.userAgent||'';if(/SM-F9\d\d/i.test(u))return 'Galaxy Z Fold';if(/Android/i.test(u))return 'Android phone';if(/iPhone|iPad/i.test(u))return 'iPhone';if(/Windows/i.test(u))return 'Windows computer';if(/Mac/i.test(u))return 'Mac';return 'This device';}
+function swReady(){return timed(navigator.serviceWorker.ready,8000);}
+async function pushRefresh(){
+  if(!S.push.supported)return;
+  try{
+    S.push.perm=Notification.permission;
+    var reg=await swReady(), s=await reg.pushManager.getSubscription(); S.push.sub=s;
+    if(s&&sb&&S.session){
+      var r=await sb.from('push_subs').select('id,role,device,last_ok').eq('endpoint',s.endpoint).maybeSingle();
+      S.push.row=r.data||null;
+      if(!r.error&&!r.data&&S.push.perm==='granted')await saveSub(s,devGet('pushRole',defaultRole()));
+    }
+  }catch(e){}
+  if(route().v==='settings')render();
+}
+function defaultRole(){var w=getWho();return w==='producer'||w==='host'?w:'all';}
+async function saveSub(s,role){
+  var r=await sb.from('push_subs').upsert({endpoint:s.endpoint,sub:s.toJSON(),email:((S.session.user&&S.session.user.email)||'').toLowerCase(),role:role,device:deviceName(),tz:(Intl.DateTimeFormat().resolvedOptions().timeZone||'')},{onConflict:'endpoint'}).select('id,role,device,last_ok').single();
+  if(r.error)throw r.error; S.push.row=r.data;
+}
+async function pushEnable(){
+  if(!sb||!S.session){toast('Sign in first.');return;}
+  S.push.busy=true;S.push.msg='';render();
+  try{
+    var p=await Notification.requestPermission(); S.push.perm=p;
+    if(p!=='granted'){S.push.msg=p==='denied'?'Notifications are blocked for this app. Open your phone’s Settings → Apps → Off The Map → Notifications, allow them, then come back.':'Notifications weren’t allowed. Tap the button again and choose Allow.';return;}
+    var reg=await swReady();
+    var s=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUB)});
+    S.push.sub=s; await saveSub(s,devGet('pushRole',defaultRole()));
+    var p0=P(); if(!p0.morning&&!p0.night&&!p0.weekly)setPrompts({morning:true,night:true,weekly:true,behind:true});
+    toast('Notifications are on for this phone');
+  }catch(e){S.push.msg='Couldn’t turn on notifications ('+(e&&e.message||e)+'). Check your connection and try again.';}
+  finally{S.push.busy=false;render();}
+}
+async function pushDisable(){
+  S.push.busy=true;render();
+  try{var s=S.push.sub;if(s){if(sb)await sb.from('push_subs').delete().eq('endpoint',s.endpoint);await s.unsubscribe();}S.push.sub=null;S.push.row=null;toast('Notifications are off for this phone');}
+  catch(e){toast('Couldn’t turn them off. Try again.');}
+  finally{S.push.busy=false;render();}
+}
+async function pushRole(role){
+  devSet('pushRole',role);
+  if(S.push.row&&sb){var r=await sb.from('push_subs').update({role:role}).eq('id',S.push.row.id);if(!r.error)S.push.row.role=role;else toast('Couldn’t save that. Try again.');}
+  render();
+}
+async function pushSend(kind){
+  if(!sb||!S.session)return;
+  if(!S.push.sub){toast('Turn on notifications for this phone first.');return;}
+  toast('Sending…');
+  try{
+    var r=await timed(sb.functions.invoke('otm-push',{body:kind?{action:'preview',kind:kind}:{action:'test'}}),20000);
+    if(r.error){var m='That didn’t send.';try{var j=await r.error.context.json();if(j&&j.error)m=j.error;}catch(_){}toast(m);return;}
+    if(kind&&!(r.data&&r.data.sent))toast({morning:'Nothing scheduled today, so there’s no morning reminder to send.',night:'Nothing scheduled tomorrow, so there’s no heads-up to send.',weekly:'Nothing scheduled this week yet.'}[kind]);
+    else toast('Sent. It should arrive in a few seconds.');
+  }catch(e){toast('That didn’t send. Check your connection.');}
+}
+/* shared settings */
+function setSettings(patch){if(!S.settings)return;S.settings=jm(S.settings,patch);render();write('config/settings',patch);}
+function setPrompts(p){setSettings({prompts:p});}
+/* custom reminders */
+S.ui.rem=null;
+function remSched(r){
+  var when=r.date?fmt(r.date):((r.days||[]).length===7?'Every day':(r.days||[]).length?(r.days||[]).join(', '):'No days picked');
+  return when+' · '+t12(r.time)+(r.who&&r.who!=='all'?' · '+whoName(r.who):'');
+}
+function keepRem(){var d=S.ui.rem;if(!d)return;['title','text','time','date'].forEach(function(k){var el=document.getElementById('rem-'+k);if(el)d[k]=el.value;});var w=document.getElementById('rem-who');if(w)d.who=w.value;}
+function remForm(){
+  var d=S.ui.rem;
+  var dayBtns=WEEK.map(function(x){return '<button type="button" data-act="remday" data-k="'+x+'" aria-pressed="'+((d.days||[]).indexOf(x)>=0)+'" data-tip="Repeat on '+x+'">'+x.slice(0,2)+'</button>';}).join('');
+  return '<div class="card" style="gap:12px"><span style="font-weight:600">New reminder</span>'+
+    '<label class="field" for="rem-title">What<input id="rem-title" class="set-in" maxlength="80" placeholder="e.g. Back up the footage" value="'+esc(d.title||'')+'"></label>'+
+    '<label class="field" for="rem-text">Details (optional)<input id="rem-text" class="set-in" maxlength="160" value="'+esc(d.text||'')+'"></label>'+
+    '<div class="seg" role="tablist" aria-label="Repeat"><button type="button" role="tab" aria-selected="'+(d.mode!=='once')+'" data-act="remmode" data-k="repeat">Repeats weekly</button><button type="button" role="tab" aria-selected="'+(d.mode==='once')+'" data-act="remmode" data-k="once">One day</button></div>'+
+    (d.mode==='once'?'<label class="field" for="rem-date">Date<input id="rem-date" type="date" class="set-in" value="'+esc(d.date||today())+'"></label>':'<div class="field">Days<div class="wkpick">'+dayBtns+'</div></div>')+
+    '<div class="row" style="gap:10px"><label class="field" for="rem-time" style="flex:1">Time<input id="rem-time" type="time" class="set-in" value="'+esc(d.time||'09:00')+'"></label>'+
+    '<label class="field" for="rem-who" style="flex:1">For<select id="rem-who"><option value="all">Everyone</option>'+team().map(function(t){return '<option value="'+esc(t.id)+'"'+(d.who===t.id?' selected':'')+'>'+esc(t.name)+'</option>';}).join('')+'</select></label></div>'+
+    '<div class="row" style="gap:8px;justify-content:flex-end"><button class="btn quiet" type="button" data-act="remcancel">Cancel</button><button class="btn" type="button" data-act="remsave">Save reminder</button></div></div>';
+}
+/* page */
+function swRow(on,act,k,title,sub,extra){
+  return '<div class="item"><span class="grow"><span style="font-weight:500">'+esc(title)+'</span>'+(sub?'<span class="small">'+sub+'</span>':'')+'</span>'+(extra||'')+'<button class="switch" type="button" role="switch" aria-checked="'+(!!on)+'" aria-label="'+esc(title)+'" data-act="'+act+'" data-k="'+k+'" data-tip="'+esc(title)+'. Tap to turn '+(on?'off':'on')+'."><span class="trk"><span class="kn"></span></span></button></div>';
+}
+function segRow(title,sub,act,cur,opts){
+  return '<div class="item" style="flex-wrap:wrap;gap:10px"><span class="grow" style="min-width:140px"><span style="font-weight:500">'+esc(title)+'</span>'+(sub?'<span class="small">'+sub+'</span>':'')+'</span><div class="seg" role="tablist" aria-label="'+esc(title)+'" style="flex:1 1 220px">'+opts.map(function(o){return '<button type="button" role="tab" aria-selected="'+(cur===o[0])+'" data-act="'+act+'" data-k="'+o[0]+'">'+esc(o[1])+'</button>';}).join('')+'</div></div>';
+}
+function sec(title,note,inner){return '<section class="setsec"><h2>'+title+'</h2>'+(note?'<p class="sub" style="margin:0">'+note+'</p>':'')+'<div class="group">'+inner+'</div></section>';}
+function viewSettings(){
+  var p=P(), ps=S.push, on=!!ps.sub, role=(ps.row&&ps.row.role)||devGet('pushRole',defaultRole());
+  /* notifications on this phone */
+  var nstat=!ps.supported?'This browser can’t receive notifications. Open the installed app from your home screen.':
+    ps.perm==='denied'?'Blocked. Allow notifications for Off The Map in your phone’s Settings → Apps → Off The Map → Notifications.':
+    on?'On'+(ps.row&&ps.row.last_ok?' · last delivered '+esc(fmt(ps.row.last_ok.slice(0,10)))+' '+esc(new Date(ps.row.last_ok).toTimeString().slice(0,5)):'')+'.':'Off. Turn them on to get reminders even when the app is closed.';
+  var n='<div class="item" style="flex-wrap:wrap;gap:10px"><span class="grow" style="min-width:180px"><span style="font-weight:600">'+esc(deviceName())+'</span><span class="small">'+nstat+'</span></span>'+
+    (ps.supported&&ps.perm!=='denied'?(on?'<button class="btn quiet" type="button" data-act="pushoff"'+(ps.busy?' disabled':'')+'>Turn off</button>':'<button class="btn" type="button" data-act="pushon"'+(ps.busy?' disabled':'')+'>'+(ps.busy?'Turning on…':'Turn on notifications')+'</button>'):'')+'</div>'+
+    (ps.msg?'<div class="item"><span class="small" style="color:var(--pin)">'+esc(ps.msg)+'</span></div>':'')+
+    (on?segRow('Whose tasks','Which tasks this phone is reminded about.','pushrole',role,[['all','Everyone']].concat(team().map(function(t){return [t.id,t.name];})))+
+      '<div class="item" style="flex-wrap:wrap;gap:8px"><span class="grow" style="min-width:140px"><span style="font-weight:500">Try it</span><span class="small">Sends to this person’s phones now.</span></span><div class="row" style="gap:6px;flex-wrap:wrap"><button class="chip" type="button" data-act="pushtest" data-k="">Test</button><button class="chip" type="button" data-act="pushtest" data-k="morning">Today</button><button class="chip" type="button" data-act="pushtest" data-k="night">Tomorrow</button><button class="chip" type="button" data-act="pushtest" data-k="weekly">Week</button></div></div>':'');
+  /* reminder schedule (shared) */
+  var dsel='<select class="set-in" data-set="prompts.weeklyDay" aria-label="Weekly review day">'+WEEK.map(function(x){return '<option'+((p.weeklyDay||'Sun')===x?' selected':'')+'>'+x+'</option>';}).join('')+'</select>';
+  var tin=function(k,d,lab){return '<input type="time" class="set-in" data-set="prompts.'+k+'" value="'+esc(p[k]||d)+'" aria-label="'+lab+'">';};
+  var tzs=['America/Los_Angeles','America/Denver','America/Chicago','America/New_York','Pacific/Honolulu'], tz=p.tz||'America/Los_Angeles';
+  if(tzs.indexOf(tz)<0)tzs.push(tz);
+  var r=swRow(p.morning,'prompt','morning','Morning prompt','On days with tasks: what’s on today.',tin('morningTime','08:00','Morning prompt time'))+
+    swRow(p.night,'prompt','night','Night-before heads-up','The evening before a day with tasks. Flags shoot days.',tin('nightTime','19:00','Night-before time'))+
+    swRow(p.weekly,'prompt','weekly','Weekly review','The week ahead, day by day, plus releases.','<span class="row" style="gap:6px">'+dsel+tin('weeklyTime','18:00','Weekly review time')+'</span>')+
+    swRow(p.behind,'prompt','behind','Include overdue tasks','Adds unfinished tasks from earlier days.')+
+    '<div class="item"><span class="grow"><span style="font-weight:500">Time zone</span><span class="small">Reminder times use this zone.</span></span><select class="set-in" data-set="prompts.tz" aria-label="Time zone">'+tzs.map(function(z){return '<option value="'+z+'"'+(z===tz?' selected':'')+'>'+z.split('/').pop().replace(/_/g,' ')+'</option>';}).join('')+'</select></div>';
+  /* custom reminders */
+  var rems=vals(S.reminders).sort(function(a,b){return (a.time||'')<(b.time||'')?-1:1;});
+  var rl=rems.map(function(x){return '<div class="item"><span class="grow"><span style="font-weight:500">'+esc(x.title)+'</span><span class="small">'+esc(remSched(x))+(x.text?' · '+esc(x.text):'')+'</span></span><button class="iconbtn" type="button" data-act="remdel" data-id="'+esc(x.id)+'" aria-label="Delete reminder '+esc(x.title)+'"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button><button class="switch" type="button" role="switch" aria-checked="'+(x.on!==false)+'" aria-label="'+esc(x.title)+'" data-act="remtoggle" data-id="'+esc(x.id)+'"><span class="trk"><span class="kn"></span></span></button></div>';}).join('');
+  var custom=(S.ui.rem?'':'')+(rl||'<div class="item"><span class="small">No custom reminders yet.</span></div>')+(S.ui.rem?'':'<button class="item" type="button" data-act="remnew" style="color:var(--accent-fg);font-weight:600"><svg class="chev" viewBox="0 0 24 24" style="stroke:currentColor"><path d="M12 5v14M5 12h14"/></svg>Add a reminder</button>');
+  /* display (this phone) */
+  var startOpts=[['today','Today'],['runway','Runway'],['episodes','Episodes'],['ideas','Ideas'],['trips','Trips']];
+  var disp=segRow('Theme','','theme',devGet('theme','system'),[['system','Auto'],['light','Light'],['dark','Dark']])+
+    segRow('Show tasks for','Filters Today and the calendar.','who',getWho(),[['all','Everyone']].concat(team().map(function(t){return [t.id,t.name];})))+
+    '<div class="item"><span class="grow"><span style="font-weight:500">Open to</span><span class="small">The first screen when you launch the app.</span></span><select class="set-in" data-dev="start" aria-label="Open to">'+startOpts.map(function(o){return '<option value="'+o[0]+'"'+(devGet('start','today')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'+
+    swRow(devGet('motion','on')!=='off','motion','','Slide animations','Page slides when you swipe between days and months.');
+  /* production (shared) */
+  var st=S.settings||{};
+  var prod='<div class="item"><span class="grow"><span style="font-weight:500">Launch date</span><span class="small">First release. Countdowns use this.</span></span><input type="date" class="set-in" data-set="launch" value="'+esc(st.launch||'')+'" aria-label="Launch date"></div>'+
+    '<div class="item"><span class="grow"><span style="font-weight:500">Bank before launch</span><span class="small">Episodes finished before the first release.</span></span><span class="row" style="gap:6px"><button class="iconbtn" type="button" data-act="bank" data-k="-1" aria-label="Fewer">−</button><span class="mono" style="min-width:24px;text-align:center;font-size:16px">'+target()+'</span><button class="iconbtn" type="button" data-act="bank" data-k="1" aria-label="More">+</button></span></div>'+
+    team().map(function(t){return '<div class="item"><span class="grow"><span style="font-weight:500">'+(t.id==='producer'?'Producer’s name':t.id==='host'?'Host’s name':'Name')+'</span><span class="small">Shown on tasks and filters.</span></span><input class="set-in" data-team="'+esc(t.id)+'" value="'+esc(t.name)+'" maxlength="24" style="width:140px" aria-label="Name for '+esc(t.id)+'"></div>';}).join('')+
+    '<div class="item"><span class="grow"><span style="font-weight:500">Schedule pattern</span><span class="small">'+esc(((st.productionDays||['Mon','Thu','Fri','Sat']).join(', ')))+' · '+(st.cycleWeeks||4)+'-week episodes, '+(st.inFlight||2)+' at a time · releases every '+((st.cadenceWeeks||2)===1?'':(st.cadenceWeeks||2)+' ')+'week'+((st.cadenceWeeks||2)===1?'':'s')+' on '+esc(st.releaseDay||'Friday')+'. Ask Claude in your project chat to change this; it reschedules the tasks for you.</span></span></div>';
+  /* data & account */
+  var n0=S.outbox.length;
+  var data='<div class="item"><span class="grow"><span style="font-weight:500">'+(n0?n0+' change'+(n0>1?'s':'')+' waiting to save':'All changes saved')+'</span><span class="small">'+(S.loadedAt?'Last refreshed '+esc(new Date(S.loadedAt).toTimeString().slice(0,5)):'Not refreshed yet')+'</span></span><button class="btn quiet" type="button" data-sact="retry">Refresh now</button></div>'+
+    '<div class="item"><span class="grow"><span style="font-weight:500">Reset this phone’s copy</span><span class="small">Clears the saved copy and reloads everything. Your plan in the cloud isn’t touched.'+(n0?' Unsaved changes on this phone would be lost.':'')+'</span></span><button class="btn quiet" type="button" data-act="resetcache">'+(S.ui.resetArm?'Tap again':'Reset')+'</button></div>';
+  var acct='<div class="item"><span class="grow"><span style="font-weight:500">Signed in</span><span class="small">'+esc(S.session&&S.session.user?S.session.user.email:'')+'</span></span><button class="btn quiet" type="button" data-sact="signout">Sign out</button></div>'+
+    '<div class="item"><span class="grow"><span style="font-weight:500">App version '+APP_VERSION+'</span><span class="small">Updates install on their own when you reopen the app.</span></span><button class="btn quiet" type="button" data-act="checkupdate">Check now</button></div>';
+  var colA=sec('Notifications','Reminders arrive on this phone even when the app is closed.',n)+sec('Reminder schedule','Shared by everyone on the team. Each phone only gets its own tasks.',r)+'<section class="setsec"><h2>Your reminders</h2><p class="sub" style="margin:0">One-off or repeating nudges, like backups or outreach follow-ups.</p>'+(S.ui.rem?remForm():'')+'<div class="group">'+custom+'</div></section>';
+  var colB=sec('Display','Only on this phone.',disp)+sec('Production','Shared by everyone on the team.',prod)+sec('Data & sync','',data)+sec('Account','',acct);
+  return '<div class="wrap"><header class="head"><div><div class="eyebrow">Off The Map · production</div><h1>Settings</h1></div>'+bell()+'</header>'+statusBanner()+(wide()?'<div class="cols">'+'<div class="setcol">'+colA+'</div><div class="setcol">'+colB+'</div></div>':'<div class="setcol">'+colA+colB+'</div>')+'</div>';
+}
+function startScreen(){
+  var st=devGet('start','today');
+  try{if(sessionStorage.getItem('otm-started'))return;sessionStorage.setItem('otm-started','1');}catch(e){}
+  if(st!=='today'&&(!location.hash||location.hash==='#today'))history.replaceState(null,'','#'+st);
 }
 
 /* quick add */
@@ -829,7 +1008,8 @@ function render(){
   var act=document.activeElement, aid=act&&act.id, sel=act&&act.selectionStart;
   var gate=S.dbState==='signedout'?viewSignIn():S.dbState==='denied'?viewDenied():null;
   document.body.classList.toggle('signedout',!!gate);
-  var html=gate?gate:r.v==='today'?viewToday():r.v==='calendar'?viewCalendar():r.v==='runway'?viewRunway():r.v==='episodes'?viewEpisodes():r.v==='episode'?viewEpisode(r.id):r.v==='ideas'?viewIdeas():r.v==='idea'?viewIdea(r.id):r.v==='queue'?viewQueue():r.v==='trips'?viewTrips():viewPrompts();
+  document.body.classList.toggle('nofab',r.v==='settings');
+  var html=gate?gate:r.v==='today'?viewToday():r.v==='calendar'?viewCalendar():r.v==='runway'?viewRunway():r.v==='episodes'?viewEpisodes():r.v==='episode'?viewEpisode(r.id):r.v==='ideas'?viewIdeas():r.v==='idea'?viewIdea(r.id):r.v==='queue'?viewQueue():r.v==='trips'?viewTrips():r.v==='settings'?viewSettings():viewPrompts();
   main.innerHTML=html;
   if(S.ui.slide){var w=main.querySelector('.wrap');if(w)w.classList.add(S.ui.slide);S.ui.slide=null;}
   var ws=main.querySelector('.weekscroll'), wc=ws&&ws.querySelector('.wk.cur'); if(wc)ws.scrollLeft=wc.offsetLeft;
@@ -880,7 +1060,7 @@ function setDay(d){S.ui.day=d===today()?null:d;}
 function dayMut(n){return function(){var d=addD(S.ui.day||today(),n);setDay(d);};}
 function monthMut(n){return function(){var mm=pd(S.ui.calMonth||((S.ui.day||today()).slice(0,8)+'01'));mm.setDate(1);mm.setMonth(mm.getMonth()+n);S.ui.calMonth=ds(mm);};}
 function pageMut(n){return route().v==='calendar'?monthMut(n):dayMut(n);}
-function reduceMotion(){try{return window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}}
+function reduceMotion(){if(devGet('motion','on')==='off')return true;try{return window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}}
 var PG={busy:false,peek:null,dir:0};
 function pageHtml(mut){
   var keep={day:S.ui.day,calMonth:S.ui.calMonth}; mut();
@@ -985,6 +1165,24 @@ document.addEventListener('click',function(ev){
   if(act==='unqueue'){var i2=S.ideas[id];if(!i2)return;i2.status='idea';i2.queue=null;render();write('ideas/'+id,{status:'idea',queue:null},'Taken out of the queue');return;}
   if(act==='qmove'){var ql=queued(),ix=-1;ql.forEach(function(x,n){if(x.id===id)ix=n;});var j=ix+(+k);if(ix<0||j<0||j>=ql.length)return;var tmp=ql[ix];ql[ix]=ql[j];ql[j]=tmp;ql.forEach(function(x,n){if(x.queue!==n+1){x.queue=n+1;write('ideas/'+x.id,{queue:n+1});}});render();return;}
   if(act==='who'){setWho(k);render();return;}
+  if(act==='pushon'){pushEnable();return;}
+  if(act==='pushoff'){pushDisable();return;}
+  if(act==='pushrole'){pushRole(k);return;}
+  if(act==='pushtest'){pushSend(k||'');return;}
+  if(act==='theme'){devSet('theme',k);applyTheme();render();return;}
+  if(act==='motion'){devSet('motion',devGet('motion','on')==='off'?'on':'off');render();return;}
+  if(act==='bank'){var nb=Math.max(1,Math.min(20,target()+(+k)));setSettings({bankTarget:nb});return;}
+  if(act==='remnew'){S.ui.rem={title:'',text:'',time:'09:00',days:['Mon'],date:'',who:'all',mode:'repeat'};render();setTimeout(function(){var t=document.getElementById('rem-title');if(t)t.focus();},30);return;}
+  if(act==='remcancel'){S.ui.rem=null;render();return;}
+  if(act==='remday'){keepRem();var dd=S.ui.rem.days||[],ix=dd.indexOf(k);if(ix>=0)dd.splice(ix,1);else dd.push(k);S.ui.rem.days=WEEK.filter(function(x){return dd.indexOf(x)>=0;});render();return;}
+  if(act==='remmode'){keepRem();S.ui.rem.mode=k;render();return;}
+  if(act==='remsave'){keepRem();var R=S.ui.rem;if(!(R.title||'').trim()){toast('Give the reminder a name.');return;}if(!R.time){toast('Pick a time.');return;}if(R.mode!=='once'&&!(R.days||[]).length){toast('Pick at least one day.');return;}
+    var rd={title:R.title.trim(),text:(R.text||'').trim(),time:R.time,who:R.who||'all',on:true};if(R.mode==='once')rd.date=R.date||today();else rd.days=R.days;
+    S.ui.rem=null;create('reminders',rd,S.push.sub?'Reminder saved':'Reminder saved. Turn on notifications to receive it.');return;}
+  if(act==='remdel'){var rr=S.reminders[id];if(!rr)return;var copy=Object.assign({},rr);delete copy.id;queueOp({k:'delete',col:'reminders',id:id,at:Date.now()});toast('Reminder deleted','Undo',function(){queueOp({k:'insert',col:'reminders',id:id,data:copy,at:Date.now()});});return;}
+  if(act==='remtoggle'){var rt0=S.reminders[id];if(!rt0)return;var on2=rt0.on===false;rt0.on=on2;render();write('reminders/'+id,{on:on2});return;}
+  if(act==='resetcache'){if(!S.ui.resetArm){S.ui.resetArm=true;render();setTimeout(function(){S.ui.resetArm=false;if(route().v==='settings')render();},4000);return;}try{localStorage.removeItem(CACHE_KEY);localStorage.removeItem(OUT_KEY);}catch(e){}location.reload();return;}
+  if(act==='checkupdate'){if(!('serviceWorker' in navigator)){toast('Updates aren’t available in this browser.');return;}navigator.serviceWorker.getRegistration().then(function(reg){if(!reg){toast('Open the installed app to check for updates.');return;}return reg.update().then(function(){if(reg.installing||reg.waiting)toast('Installing the new version…');else toast('You’re on the latest version.');});}).catch(function(){toast('Couldn’t check. Try again with a connection.');});return;}
   if(act==='go'){if(k==='calendar')S.ui.calMonth=(S.ui.day||today()).slice(0,8)+'01';if(location.hash==='#'+k)render();else location.hash='#'+k;return;}
   if(act==='setday'){jumpToDay(k);return;}
   if(act==='shiftday'){shiftDay(+k);return;}
@@ -998,6 +1196,21 @@ document.addEventListener('click',function(ev){
   if(act==='trip'){S.ui.trip=id;render();var m=document.getElementById('main');if(m)m.scrollTop=0;return;}
 });
 function keepText(){var t=document.getElementById('qa-text');if(t&&S.ui.add)S.ui.add.text=t.value;var w=document.getElementById('qa-who');if(w&&S.ui.add)S.ui.add.who=w.value;}
+document.addEventListener('change',function(ev){
+  /* Run after the event: a change can fire while the page is being redrawn (on blur). */
+  var el=ev.target; setTimeout(function(){onSettingChange(el);},0);
+});
+function onSettingChange(el){
+  var k;
+  if((k=el.getAttribute('data-set'))){
+    var v=el.value; if(!v&&el.type!=='select-one')return;
+    var curV=k.split('.').reduce(function(o,x){return o&&o[x];},S.settings||{}); if(String(curV)===v)return;
+    var parts=k.split('.'), patch={}, cur=patch; for(var i=0;i<parts.length-1;i++){cur[parts[i]]={};cur=cur[parts[i]];} cur[parts[parts.length-1]]=v;
+    setSettings(patch); toast('Saved'); return;
+  }
+  if((k=el.getAttribute('data-dev'))){devSet(k,el.value);toast('Saved');return;}
+  if((k=el.getAttribute('data-team'))){var nm=el.value.trim();if(!nm||!S.settings)return;if(team().some(function(t){return t.id===k&&t.name===nm;}))return;var tm=team().map(function(t){return t.id===k?Object.assign({},t,{name:nm}):t;});S.settings=Object.assign({},S.settings,{team:tm});render();write('config/settings',{team:tm},'Saved');return;}
+}
 document.addEventListener('input',function(ev){
   var k=ev.target.getAttribute('data-input'); if(!k)return;
   if(k==='epq'){S.ui.epQuery=ev.target.value;render();}
@@ -1027,10 +1240,12 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
+var APP_VERSION='7';
 S.ui.who=getWho();
+applyTheme();
+startScreen();
 render();
 start();
-var APP_VERSION='6';
 /* Updates: check for a new version whenever the app comes back to the front, and reload into it automatically. */
 if('serviceWorker' in navigator){
   var hadCtrl=!!navigator.serviceWorker.controller, reloading=false;

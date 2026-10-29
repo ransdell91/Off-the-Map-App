@@ -1,0 +1,7 @@
+-- Push notifications (applied as migration otm_push, plus the steps below run once).
+-- Tables push_subs (each person's phones) and push_log (what has been sent), pg_cron and pg_net.
+-- Secrets live in Supabase Vault: otm_vapid_public, otm_vapid_private, otm_cron_secret.
+-- public.otm_push_secrets() returns them to the service role only (used by the otm-push function).
+-- Cron job 'otm-reminders' runs every 5 minutes and calls functions/v1/otm-push with the cron secret header.
+-- Function source: supabase/functions/otm-push/index.ts (deployed with verify_jwt = false; it checks the
+-- cron secret or the signed-in member itself).

@@ -1,7 +1,7 @@
 // Off The Map: offline support.
 // The app shell is cached so the app opens without a connection.
 // Your data is never cached here; the app keeps its own copy of your last-loaded plan.
-const VERSION = 'otm-v6';
+const VERSION = 'otm-v7';
 const SHELL = [
   './',
   './index.html',
@@ -11,7 +11,8 @@ const SHELL = [
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
   './icons/favicon-32.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './icons/badge-96.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -59,4 +60,36 @@ self.addEventListener('fetch', (event) => {
   if (url.origin === self.location.origin) {
     event.respondWith(caches.match(req).then((hit) => hit || fetch(req)));
   }
+});
+
+// Reminder notifications sent by the server (Supabase function otm-push).
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { title: 'Off The Map', body: event.data ? event.data.text() : '' }; }
+  const title = d.title || 'Off The Map';
+  event.waitUntil(self.registration.showNotification(title, {
+    body: d.body || '',
+    icon: './icons/icon-192.png',
+    badge: './icons/badge-96.png',
+    tag: d.tag || undefined,
+    renotify: !!d.tag,
+    data: { url: d.url || './#today' }
+  }));
+});
+
+// Tapping a notification opens the app (or brings it forward) on the right screen.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = new URL((event.notification.data && event.notification.data.url) || './#today', self.registration.scope).href;
+  event.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of all) {
+      if (c.url.startsWith(self.registration.scope)) {
+        await c.focus();
+        try { await c.navigate(target); } catch (e) { c.postMessage({ type: 'open', url: target }); }
+        return;
+      }
+    }
+    await self.clients.openWindow(target);
+  })());
 });
