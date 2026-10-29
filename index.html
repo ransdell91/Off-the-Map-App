@@ -51,26 +51,37 @@ a{color:var(--link)}
 .main > .wrap{will-change:auto}
 .peek{position:absolute;left:0;right:0;pointer-events:none;background:var(--bg)}
 .peek > .wrap{margin-left:auto;margin-right:auto}
-.wrap{padding-block:14px 104px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px;max-width:1100px;margin:0 auto;box-sizing:border-box}
+.wrap{padding-block:6px 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px;max-width:1100px;margin:0 auto;box-sizing:border-box}
 
-/* nav */
-.nav{order:2;flex:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:var(--surface2);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+/* app bar, floating dock and rail */
+.stage{flex:1 1 auto;min-width:0;min-height:0;display:flex;flex-direction:column}
+.topbar{flex:none;background:var(--bg);position:relative;z-index:6;transition:box-shadow .2s}
+.topbar.scrolled{box-shadow:0 1px 0 var(--line),0 6px 14px -10px rgba(0,0,0,.25)}
+.tb-in{max-width:1100px;margin:0 auto;box-sizing:border-box;height:74px;padding:8px max(10px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:6px}
+.tb-back{margin-left:-10px;color:var(--link)}
+.tb-titles{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.tb-titles .eyebrow{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-title{font-family:var(--f-display);font-weight:700;font-size:28px;line-height:1.08;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-act{display:flex;align-items:center;gap:0;flex:none}
+.tb-act .iconbtn[aria-pressed="true"]{background:var(--sand);color:var(--accent-fg)}
+.nav{position:fixed;z-index:15;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;padding:6px;box-sizing:border-box;background:color-mix(in srgb,var(--surface2) 86%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border:1px solid var(--line);border-radius:28px;box-shadow:0 10px 30px -8px rgba(0,0,0,.35),0 2px 6px rgba(0,0,0,.08)}
 .nav .rail-top{display:none}
-.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:52px;text-decoration:none;color:var(--muted);font-size:11px;line-height:1;border-radius:16px}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:52px;text-decoration:none;color:var(--muted);font-size:11px;line-height:1;border-radius:22px;transition:background .15s,color .15s}
 .tab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.tab[aria-current="page"]{color:var(--accent-fg);font-weight:600}
+.tab[aria-current="page"]{color:var(--accent-fg);font-weight:600;background:color-mix(in srgb,var(--accent) 16%,transparent)}
 .tab[aria-current="page"] svg{stroke-width:2.2}
-.fab{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(92px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:18px;background:var(--accent);color:var(--on-accent);border:0;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer;z-index:5}
+.fab{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(88px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:18px;background:var(--accent);color:var(--on-accent);border:0;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -4px rgba(0,0,0,.35);cursor:pointer;z-index:14}
 .fab svg,.railadd svg{width:26px;height:26px;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;fill:none}
 
 @media (min-width:600px){
   .app{flex-direction:row}
-  .nav{order:0;display:flex;flex-direction:column;align-items:center;gap:6px;width:92px;border-top:0;border-right:1px solid var(--line);padding:20px 0 calc(20px + env(safe-area-inset-bottom,0px)) env(safe-area-inset-left,0px);box-sizing:content-box;overflow-y:auto}
-  .nav .rail-top{display:flex;flex-direction:column;align-items:center;gap:16px;padding-bottom:12px}
-  .tab{width:72px;min-height:60px}
-  .tab[aria-current="page"]{background:rgba(62,92,70,.16)}
+  .nav{position:relative;left:auto;right:auto;bottom:auto;max-width:none;align-self:flex-start;flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;width:78px;margin:12px 0 12px max(12px,env(safe-area-inset-left,0px));padding:14px 0;max-height:calc(100% - 24px);overflow-y:auto;border-radius:30px}
+  .nav .rail-top{display:flex;flex-direction:column;align-items:center;gap:14px;padding-bottom:10px}
+  .tab{width:64px;min-height:60px;border-radius:20px}
   .fab{display:none}
-  .wrap{padding-block:24px 40px;padding-left:32px;padding-right:max(32px,env(safe-area-inset-right,0px));gap:22px}
+  .tb-in{height:88px;padding:14px max(24px,env(safe-area-inset-right,0px)) 8px 32px}
+  .tb-title{font-size:34px}
+  .wrap{padding-block:8px 40px;padding-left:32px;padding-right:max(32px,env(safe-area-inset-right,0px));gap:22px}
 }
 .railadd{width:56px;height:56px;border-radius:16px;background:var(--accent);color:var(--on-accent);border:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .mark{color:var(--ink)}
@@ -246,6 +257,9 @@ button[data-tip],a.tab,a.item,a.lane,a.chip,.owner,.cell,.day{-webkit-user-selec
 .ticker .pips i{width:10px;height:6px;border-radius:2px;background:rgba(237,227,200,.22)}
 .ticker .pips i.on{background:var(--pin-bright)}
 .daynav{display:flex;align-items:center;gap:2px;min-width:0}
+.dayhead{display:flex;flex-direction:column;gap:6px}
+.dayhead h2.big{font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1.1;margin:0}
+@media (min-width:600px){.dayhead h2.big{font-size:30px}}
 .datebtn{display:inline-flex;align-items:center;gap:4px;min-height:44px;border:0;background:transparent;padding:0 6px;border-radius:10px;cursor:pointer;color:var(--muted);font-family:var(--f-mono);font-size:12px;letter-spacing:.1em}
 .datebtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .datebtn:hover{background:var(--sand);color:var(--ink)}
@@ -287,7 +301,7 @@ button.day{border:0;font:inherit;cursor:pointer;background:transparent}
 .wrap.slide-l{animation:slideL .18s ease-out}
 .wrap.slide-r{animation:slideR .18s ease-out}
 /* sign-in */
-body.signedout .nav, body.signedout .fab{display:none}
+body.signedout .nav, body.signedout .fab, body.signedout .topbar{display:none}
 .signin{max-width:440px;margin:0 auto;min-height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:18px}
 .signin form{display:flex;flex-direction:column;gap:10px}
 .signin input{min-height:48px;border-radius:12px;border:1px solid var(--line-strong);background:var(--field);color:var(--ink);padding:0 14px;font-size:16px}
@@ -308,9 +322,10 @@ body.signedout .nav, body.signedout .fab{display:none}
     <a class="tab" href="#episodes" data-tab="episodes" data-tip="All scheduled episodes"><svg viewBox="0 0 24 24"><path d="M3 6h13v12H3zM16 10l5-3v10l-5-3"/></svg>Episodes</a>
     <a class="tab" href="#ideas" data-tab="ideas" data-tip="Every idea, and the queue of greenlit ones"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 7.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5"/></svg>Ideas</a>
     <a class="tab" href="#trips" data-tab="trips" data-tip="Shoot trips, b-roll lists and pack lists"><svg viewBox="0 0 24 24"><path d="M6 16a2 2 0 1 0 0 4a2 2 0 1 0 0-4M18 4a2 2 0 1 0 0 4a2 2 0 1 0 0-4M8 18h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></svg>Trips</a>
-    <a class="tab" href="#settings" data-tab="settings" data-tip="Notifications, reminders, display and account"><svg viewBox="0 0 24 24"><path d="M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</a>
+
   </nav>
-  <main class="main" id="main"><div class="wrap"><div class="empty">Loading your production plan…</div></div></main>
+  <div class="stage"><header class="topbar" id="topbar"></header>
+  <main class="main" id="main"><div class="wrap"><div class="empty">Loading your production plan…</div></div></main></div>
 </div>
 <button class="fab" type="button" data-act="add" aria-label="Quick add" data-tip="Quick add a task, idea, shot or note"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
 <div id="overlay"></div>
@@ -545,7 +560,8 @@ document.getElementById('toast').addEventListener('click',function(ev){if(!ev.ta
 function route(){var h=(location.hash||'#today').slice(1);if(h.indexOf('episode-')===0)return {v:'episode',id:h.slice(8)};if(h.indexOf('idea-')===0)return {v:'idea',id:h.slice(5)};if(['today','calendar','runway','episodes','ideas','queue','trips','prompts','settings'].indexOf(h)<0)return {v:'today'};return {v:h};}
 function wide(){return window.matchMedia('(min-width:600px)').matches;}
 
-function bell(){var n=unread();return '<span class="row" style="gap:2px;flex:none">'+claudeBtn()+'<a class="iconbtn" href="#prompts" aria-label="Prompts'+(n?', '+n+' new':'')+'" data-tip="Daily prompts from Claude'+(n?' · '+n+' unread':'')+'"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4"/></svg>'+(n?'<span class="badge">'+n+'</span>':'')+'</a></span>';}
+function bell(){return '';}
+function bellBtn(){var n=unread();return '<a class="iconbtn" href="#prompts" aria-label="Prompts'+(n?', '+n+' new':'')+'" data-tip="Daily prompts from Claude'+(n?' · '+n+' unread':'')+'"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4"/></svg>'+(n?'<span class="badge">'+n+'</span>':'')+'</a>';}
 function statusBanner(){
   var n=S.outbox.length, pend=n?(n===1?'1 change':n+' changes'):'';
   if(S.dbState==='offline')return '<div class="notice"><span class="dot"></span>You’re offline. Showing your plan as of '+esc(S.cachedAt?fmt(S.cachedAt.slice(0,10),false)+' '+S.cachedAt.slice(11,16)+' UTC':'your last visit')+'.'+(n?' '+pend+' saved on this phone, sending when you’re back online.':' Changes save once you’re back online.')+'</div>';
@@ -589,7 +605,7 @@ function dayNav(d){
     '<button class="iconbtn" type="button" data-act="shiftday" data-k="-1" aria-label="Previous day" data-tip="Previous day. You can also swipe right or press the left arrow key.">'+svg('M15 5l-7 7 7 7','')+'</button>'+
     '<button class="datebtn" type="button" data-act="go" data-k="calendar" data-tip="Pick a day on the calendar"><span>'+esc(fmt(d).toUpperCase())+'</span>'+svg('M6 9l6 6 6-6','')+'</button>'+
     '<button class="iconbtn" type="button" data-act="shiftday" data-k="1" aria-label="Next day" data-tip="Next day. You can also swipe left or press the right arrow key.">'+svg('M9 5l7 7-7 7','')+'</button></div>'+
-    '<span class="row" style="gap:4px">'+(d!==real?'<button class="btn quiet sm" type="button" data-act="setday" data-k="'+real+'" data-tip="Jump back to today">Today</button>':'')+bell()+'</span></div>';
+    '<span class="row" style="gap:4px;min-height:44px">'+(d!==real?'<button class="btn quiet sm" type="button" data-act="setday" data-k="'+real+'" data-tip="Jump back to today">Today</button>':'')+'</span></div>';
 }
 function viewToday(){
   var real=today(), d=S.ui.day||real, isReal=d===real, role=roleFor(d), ls=lineStart(), pre=d<ls, wk=Math.floor(daysBetween(ls,d)/7)+1;
@@ -617,7 +633,7 @@ function viewToday(){
     (todays.length?'<div class="group">'+todays.map(function(t){return taskRow(t);}).join('')+'</div>':(role?'<div class="empty">No tasks for this day. Add one with the + button.</div>':''))+
     (carried.length?'<p class="label" style="margin-top:6px">Carried over</p><div class="group">'+carried.map(function(t){return taskRow(t,true);}).join('')+'</div>':'')+'</section>';
   var up=nd?'<section aria-labelledby="un" style="display:flex;flex-direction:column;gap:10px"><h2 id="un">Up next</h2><button class="card" type="button" data-act="setday" data-k="'+nd+'" style="flex-direction:row;align-items:center;gap:14px;text-align:left;cursor:pointer;width:100%;font:inherit;color:inherit" data-tip="Open '+esc(fmt(nd))+' in the day view"><span class="daychip" style="flex-direction:column;background:var(--sky);color:var(--ink);line-height:1.1"><span>'+DOW[pd(nd).getDay()].toUpperCase()+'</span><span style="font-size:16px;font-weight:700">'+pd(nd).getDate()+'</span></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-weight:600">'+(nextTrip?'Shoot: '+esc(nextTrip.name):esc(nextRole.name))+'</span><span class="small">'+(nextEp?esc(shortName(nextEp)):'No episode in this half yet')+(upcoming.length?' · '+upcoming.length+' tasks':'')+'</span></span>'+svg(CHEV)+'</button></section>':'';
-  return '<div class="wrap"><header style="display:flex;flex-direction:column;gap:10px">'+dayNav(d)+'<div><h1>'+esc(title)+'</h1><div class="sub" style="margin-top:4px">'+esc(subl)+'</div></div></header>'+ticker(d)+todaySeg('day')+statusBanner()+'<div class="cols"><div>'+left+'</div><div>'+onLine(d)+up+'</div></div></div>';
+  return '<div class="wrap"><div class="dayhead">'+dayNav(d)+'<div><h2 class="big">'+esc(title)+'</h2><div class="sub" style="margin-top:4px">'+esc(subl)+'</div></div></div>'+ticker(d)+todaySeg('day')+statusBanner()+'<div class="cols"><div>'+left+'</div><div>'+onLine(d)+up+'</div></div></div>';
 }
 
 function onLine(d){
@@ -655,7 +671,7 @@ function viewCalendar(){
   var agendaHtml=list.length?'<div class="group">'+list.map(function(a){return '<a class="item" href="'+esc(a.z.href)+'" data-tip="'+esc('Open '+a.z.label.replace(/^Shoot: /,'')) +'"><span class="mono small" style="width:64px;flex:none">'+esc(fmt(a.d,false))+'</span><span class="grow"><span style="font-weight:600">'+esc(a.z.label)+'</span><span class="small">'+esc(KIND_NAME[a.z.k])+'</span></span><i class="kdot k-'+a.z.k+'" aria-hidden="true"></i></a>';}).join('')+'</div>':'<div class="empty">No shoots, banks or releases this month.</div>';
   var title=MON[first.getMonth()]+' '+first.getFullYear();
   var legend='<div class="legend"><span><i class="lg-prod"></i>Production day</span><span><i class="k-start"></i>Episode starts</span><span><i class="k-shoot"></i>Shoot</span><span><i class="k-bank"></i>Banked</span><span><i class="k-release"></i>Release</span><span><b class="cnt" style="position:static">3h</b> Planned task time</span></div>';
-  return '<div class="wrap"><header style="display:flex;flex-direction:column;gap:10px"><div class="row" style="justify-content:space-between;gap:4px"><div class="daynav"><button class="iconbtn" type="button" data-act="calmonth" data-k="-1" aria-label="Previous month" data-tip="Previous month. You can also swipe right.">'+svg('M15 5l-7 7 7 7','')+'</button><h1 style="font-size:30px">'+esc(title)+'</h1><button class="iconbtn" type="button" data-act="calmonth" data-k="1" aria-label="Next month" data-tip="Next month. You can also swipe left.">'+svg('M9 5l7 7-7 7','')+'</button></div><span class="row" style="gap:4px">'+(m.slice(0,7)!==real.slice(0,7)?'<button class="btn quiet sm" type="button" data-act="calmonth" data-k="0" data-tip="Jump back to this month">This month</button>':'')+bell()+'</span></div></header>'+
+  return '<div class="wrap"><div class="dayhead"><div class="row" style="justify-content:space-between;gap:4px"><div class="daynav"><button class="iconbtn" type="button" data-act="calmonth" data-k="-1" aria-label="Previous month" data-tip="Previous month. You can also swipe right.">'+svg('M15 5l-7 7 7 7','')+'</button><h2 class="big" style="min-width:150px;text-align:center">'+esc(title)+'</h2><button class="iconbtn" type="button" data-act="calmonth" data-k="1" aria-label="Next month" data-tip="Next month. You can also swipe left.">'+svg('M9 5l7 7-7 7','')+'</button></div><span class="row" style="gap:4px">'+(m.slice(0,7)!==real.slice(0,7)?'<button class="btn quiet sm" type="button" data-act="calmonth" data-k="0" data-tip="Jump back to this month">This month</button>':'')+'</span></div></div>'+
     ticker(real)+todaySeg('cal')+statusBanner()+
     '<div class="cols cal-cols"><div><div class="cal" role="group" aria-label="'+esc(title)+'">'+head+cells+'</div>'+legend+'</div><div><section style="display:flex;flex-direction:column;gap:8px"><h2>This month</h2>'+agendaHtml+'</section></div></div></div>';
 }
@@ -683,7 +699,7 @@ function viewRunway(){
   var pr=[['morning','Morning prompt','Mon, Thu, Fri, Sat · '+(P.morningTime||'08:00')],['night','Night-before heads-up','Sun and Wed · '+(P.nightTime||'19:00')],['behind','Behind-schedule alerts','Added to the morning prompt'],['weekly','Weekly review','Mondays, with the morning prompt']].map(function(p){var on=!!P[p[0]];return '<div class="item"><span class="grow"><span style="font-weight:500">'+p[1]+'</span><span class="small">'+esc(p[2])+'</span></span><button class="switch" type="button" role="switch" aria-checked="'+on+'" aria-label="'+p[1]+'" data-act="prompt" data-k="'+p[0]+'" data-tip="'+p[1]+' · '+esc(p[2])+'. Tap to turn '+(on?'off':'on')+'."><span class="trk"><span class="kn"></span></span></button></div>';}).join('');
   var rt='<div style="display:flex;flex-direction:column;gap:18px;min-width:0"><section style="display:flex;flex-direction:column;gap:8px"><h2>Every week</h2><p class="sub" style="margin:0">Mon and Thu work the episode you are writing. Fri and Sat work the episode you are making. Every other Monday, the written episode moves to making and a new one starts.</p><div class="group">'+routine+'</div></section><section style="display:flex;flex-direction:column;gap:8px"><h2>Who does what</h2><div class="group">'+teamHtml+'</div></section><section style="display:flex;flex-direction:column;gap:8px"><h2>Reminders</h2><a class="item" href="#settings" data-tip="Open Settings to turn on notifications and set reminder times"><span class="grow"><span style="font-weight:600">Notifications and reminder times</span><span class="small">'+esc(reminderSummary())+'</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></a></section></div>';
   var body=w?'<div class="cols">'+line+rt+'</div>':('<div class="seg" role="tablist" aria-label="Runway view"><button type="button" role="tab" aria-selected="'+(tab==='line')+'" data-act="rtab" data-k="line" data-tip="Every episode on the production line and the release calendar">The line</button><button type="button" role="tab" aria-selected="'+(tab==='routine')+'" data-act="rtab" data-k="routine" data-tip="The weekly rhythm, who does what, and prompt settings">Routine</button></div>'+(tab==='line'?line:rt));
-  return '<div class="wrap"><header class="head"><div><div class="eyebrow">'+target()+' banked before launch</div><h1>Runway</h1></div>'+bell()+'</header>'+statusBanner()+body+'</div>';
+  return '<div class="wrap">'+statusBanner()+body+'</div>';
 }
 
 function epRow(e,asButton){
@@ -698,7 +714,7 @@ function viewEpisodes(){
   var chips=['All'].concat(STAGES).map(function(s){return '<button class="chip" type="button" data-act="epstage" data-k="'+s+'" aria-pressed="'+(f===s)+'" data-tip="'+(s==='All'?'Show every episode':'Show episodes marked '+STAGE_NAME[s])+'">'+(s==='All'?'All':STAGE_NAME[s])+' <span class="n">'+counts[s]+'</span></button>';}).join('');
   var shown=list.filter(function(e){return (f==='All'||stageOf(e)===f)&&(!q||(e.title+' '+e.hook+' '+shortName(e)).toLowerCase().indexOf(q)>=0);});
   var listHtml=shown.length?'<div class="group">'+shown.map(function(e){return epRow(e,w);}).join('')+'</div>':'<div class="empty">No episodes match.</div>';
-  var head='<header class="head"><div><div class="eyebrow">'+list.length+' in the plan · '+bankedCount()+' banked</div><h1>Episodes</h1></div>'+bell()+'</header>'+statusBanner()+
+  var head=''+statusBanner()+
     '<label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span class="sr">Search episodes</span><input id="epq" type="search" placeholder="Search episodes" value="'+esc(S.ui.epQuery)+'" data-input="epq" data-tip="Search episode titles and hooks"></label>'+
     '<div class="chips" role="group" aria-label="Filter by stage">'+chips+'</div>'+listHtml+'<a class="btn ghost" href="#queue" data-tip="Greenlit ideas waiting for a slot on the schedule">Queued ideas · '+queued().length+'</a>';
   if(!w)return '<div class="wrap">'+head+'</div>';
@@ -737,7 +753,7 @@ function episodeBody(e,inPane){
   var pct=allT.length?Math.round(doneN/allT.length*100):0;
   var weekCard='<div class="card"><div class="row" style="justify-content:space-between;align-items:baseline;gap:8px"><span style="font-weight:600">'+esc(stLine)+'</span>'+pill+'</div>'+(allT.length?'<div class="small">'+doneN+' of '+allT.length+' tasks done</div><div class="bar" role="progressbar" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100" aria-label="Tasks done"><span style="width:'+pct+'%"></span></div>':'<div class="small">No tasks yet.</div>')+'</div>';
   var main={overview:sched+weekCard+flags,shots:shotsBlock(e,'episodes'),docs:docsBlock(e),tasks:tasksHtml}[tab]||'';
-  var head=(inPane?'':'<a class="back" href="#episodes" data-tip="Back to all episodes"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Episodes</a>')+
+  var head=
     '<header style="display:flex;flex-direction:column;gap:6px"><div class="eyebrow">'+esc(series(e.series).name)+' · '+esc(tripName(e.trip))+'</div><h1 style="font-size:'+(inPane?'28px':'30px')+';line-height:1.12">'+esc(e.title)+'</h1><p class="sub" style="margin:0">'+esc(e.logline||e.hook)+'</p></header>'+
     '<ol class="steps" aria-label="Stage: '+STAGE_NAME[p]+'">'+steps+'</ol><div class="small" style="margin-top:-8px"><strong style="color:var(--link)">'+STAGE_NAME[p]+'</strong> · episode '+String(e.prod).padStart(2,'0')+' of '+eps().length+'</div>'+tabChips(e.chat?'<a class="chip go" href="'+esc(e.chat)+'" target="_blank" rel="noopener" data-tip="Open this episode’s chat in Claude">Claude chat ↗</a>':'');
   return '<div class="epbody">'+head+'<div class="epcols'+(tab==='overview'?'':' nonov')+'"><div>'+main+'</div><div class="side">'+gateBlock(e,'episodes')+(tab!=='docs'?docsBlock(e):'')+'</div></div></div>';
@@ -767,7 +783,7 @@ function ideaBody(i){
   var itasks=vals(S.tasks).filter(function(t){return t.idea===i.id;}).sort(function(a,b){return a.day<b.day?-1:1;});
   var tasksHtml=itasks.length?'<div class="group">'+itasks.map(function(t){return taskRow(t,true);}).join('')+'</div>':'<div class="empty">No tasks yet. Add one with the + button while this idea is open.</div>';
   var main={overview:card+facts,shots:shotsBlock(i,'ideas'),docs:docsBlock(i),tasks:tasksHtml}[tab]||'';
-  var head='<a class="back" href="'+(pos?'#queue':'#ideas')+'" data-tip="'+(pos?'Back to the queue':'Back to all ideas')+'"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>'+(pos?'Queue':'Ideas')+'</a>'+
+  var head=
     '<header style="display:flex;flex-direction:column;gap:6px"><div class="eyebrow">'+esc(series(i.series).name)+(i.region?' · '+esc(i.region):'')+'</div><h1 style="font-size:30px;line-height:1.12">'+esc(i.title)+'</h1><p class="sub" style="margin:0">'+esc(i.hook)+'</p></header>'+
     '<div class="small"><strong style="color:var(--link)">'+esc(status)+'</strong></div>'+tabChips(menuBtn);
   return '<div class="epbody">'+head+'<div class="epcols'+(tab==='overview'?'':' nonov')+'"><div>'+main+'</div><div class="side">'+gateBlock(i,'ideas')+(tab!=='docs'?docsBlock(i):'')+'</div></div></div>';
@@ -790,7 +806,7 @@ function viewIdeas(){
       return '<a class="item" style="align-items:flex-start" href="'+(ep?'#episode-'+esc(ep.id):'#idea-'+esc(i.id))+'" data-tip="'+(ep?'Open episode '+String(ep.prod).padStart(2,'0'):'Open this idea to plan it or greenlight it')+'"><span class="grow"><span style="font-weight:600;line-height:1.3">'+esc(i.title)+'</span><span style="font-size:13px;color:var(--muted2)">'+esc(i.hook)+'</span><span class="small">'+esc(ideaMeta(i))+'</span></span>'+right+'</a>';
     }).join('')+'</div></section>';
   }).join('');
-  return '<div class="wrap"><header class="head"><div><div class="eyebrow">Ideas only · no scripts</div><h1>Ideas</h1></div><span class="row" style="gap:4px">'+bell()+'<button class="iconbtn" type="button" data-act="add" data-k="idea" aria-label="New idea" data-tip="Add a new idea" style="background:var(--accent);color:#FFFFFF"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></span></header>'+statusBanner()+ideasSeg('all')+
+  return '<div class="wrap">'+statusBanner()+ideasSeg('all')+
     '<label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span class="sr">Search ideas</span><input id="iq" type="search" placeholder="Search '+all.length+' ideas" value="'+esc(S.ui.ideaQuery)+'" data-input="iq" data-tip="Search idea titles, hooks and regions"></label>'+
     '<div class="chips" role="group" aria-label="Filter by series">'+chips+'</div>'+(groups?'<div class="ideagrid">'+groups+'</div>':'<div class="empty">No ideas match.</div>')+'</div>';
 }
@@ -800,7 +816,7 @@ function viewQueue(){
     return '<div class="item" style="align-items:center"><span class="thumb th-greenlit" style="font-size:16px">'+(k+1)+'</span><a class="grow" href="#idea-'+esc(i.id)+'" style="color:inherit;text-decoration:none" data-tip="Open this idea"><span style="font-weight:600;line-height:1.3">'+esc(i.title)+'</span><span class="small">'+esc(series(i.series).name+(ideaMeta(i)?' · '+ideaMeta(i):''))+'</span></a>'+
       '<span class="row" style="gap:0;flex:none"><button class="iconbtn" type="button" data-act="qmove" data-id="'+esc(i.id)+'" data-k="-1" aria-label="Move up" data-tip="Move earlier in the queue"'+(k===0?' disabled':'')+'>'+svg('M6 15l6-6 6 6','')+'</button><button class="iconbtn" type="button" data-act="qmove" data-id="'+esc(i.id)+'" data-k="1" aria-label="Move down" data-tip="Move later in the queue"'+(k===q.length-1?' disabled':'')+'>'+svg('M6 9l6 6 6-6','')+'</button><button class="iconbtn" type="button" data-act="unqueue" data-id="'+esc(i.id)+'" aria-label="Take out of the queue" data-tip="Take this idea out of the queue"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span></div>';
   }).join('');
-  return '<div class="wrap" style="max-width:760px"><header class="head"><div><div class="eyebrow">Greenlit · waiting for a slot</div><h1>Queue</h1></div>'+bell()+'</header>'+statusBanner()+ideasSeg('queue')+
+  return '<div class="wrap">'+statusBanner()+ideasSeg('queue')+
     '<div class="notice"><span class="dot"></span>Queued ideas go on the schedule in this order when a slot opens. To schedule the next one, ask Claude in the project chat.</div>'+
     (q.length?'<div class="group">'+rows+'</div>':'<div class="empty">Nothing is queued. Open an idea and tap Greenlight to add it here.</div>')+'</div>';
 }
@@ -821,7 +837,7 @@ function viewTrips(){
     var pack='<section style="display:flex;flex-direction:column;gap:8px"><div class="row" style="justify-content:space-between"><p class="label">Pack list</p><span class="small">'+packKeys.filter(function(k){return cur.pack[k];}).length+' of '+packKeys.length+'</span></div><div class="group">'+packKeys.map(function(k){return '<button class="item" type="button" role="checkbox" aria-checked="'+(!!cur.pack[k])+'" data-act="pack" data-id="'+esc(cur.id)+'" data-k="'+esc(k)+'" data-tip="Tick when it’s packed"><span class="ring sq">'+CHECK+'</span>'+esc(k)+'</button>';}).join('')+'</div></section>';
     hero='<div>'+hero+'</div><div>'+pack+tripList(sched,later,cur)+'</div>';
   }
-  return '<div class="wrap"><header class="head"><div><div class="eyebrow">One trip · several episodes</div><h1>Trips</h1></div>'+bell()+'</header>'+statusBanner()+(cur?'<div class="cols">'+hero+'</div>':'<div class="empty">Trips appear here once the plan loads.</div>')+'</div>';
+  return '<div class="wrap">'+statusBanner()+(cur?'<div class="cols">'+hero+'</div>':'<div class="empty">Trips appear here once the plan loads.</div>')+'</div>';
 }
 function tripList(sched,later,cur){
   function row(t){return '<button class="item" type="button" data-act="trip" data-id="'+esc(t.id)+'" data-tip="Show this trip" aria-current="'+(cur&&cur.id===t.id)+'"><span class="grow"><span style="font-weight:600">'+esc(t.name)+'</span><span class="small">'+esc((t.episodes||[]).map(function(id){return S.episodes[id]?shortName(S.episodes[id]):id;}).join(' · ')||t.region)+'</span></span><span class="mono small">'+(t.start?fmt(t.start,false):'')+'</span></button>';}
@@ -831,9 +847,29 @@ function tripList(sched,later,cur){
 function viewPrompts(){
   var list=vals(S.prompts).sort(function(a,b){return (b.at||'')<(a.at||'')?-1:1;});
   var body=list.length?'<div class="group">'+list.map(function(p){return '<div class="item" style="align-items:flex-start"><span class="grow"><span class="row" style="justify-content:space-between"><span style="font-weight:'+(p.read?500:700)+'">'+esc(p.title)+'</span><span class="small">'+esc(p.at?fmt(p.at.slice(0,10),true):'')+'</span></span><span style="font-size:14px;color:var(--muted2);white-space:pre-wrap">'+esc(p.body)+'</span></span>'+(p.read?'':'<span class="dot" style="color:var(--pin);margin-top:7px" aria-label="Unread"></span>')+'</div>';}).join('')+'</div>':'<div class="empty">Your daily prompts will collect here once they’re switched on. The first one arrives on your next production morning.</div>';
-  return '<div class="wrap" style="max-width:700px"><a class="back" href="#today" data-tip="Back to Today"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Today</a><header class="head" style="padding-top:0"><h1>Prompts</h1>'+(list.some(function(p){return !p.read;})?'<button class="btn quiet" type="button" data-act="readall" data-tip="Mark every prompt as read">Mark all read</button>':'')+'</header>'+body+'<a class="linkbtn small" href="#settings" style="margin-top:8px">Reminder settings</a></div>';
+  return '<div class="wrap">'+(list.some(function(p){return !p.read;})?'<div class="row" style="justify-content:flex-end"><button class="btn quiet" type="button" data-act="readall" data-tip="Mark every prompt as read">Mark all read</button></div>':'')+''+body+'<a class="linkbtn small" href="#settings" style="margin-top:8px">Reminder settings</a></div>';
 }
 
+/* ---------- top bar: the same on every screen ---------- */
+var GEAR_SVG='<svg viewBox="0 0 24 24"><path d="M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+function topbarHtml(r){
+  var t='', eb='', back=null, launch=(S.settings&&S.settings.launch)||'2027-02-19';
+  if(r.v==='today'){t='Today';var td=pd(today());eb=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][td.getDay()]+', '+MON[td.getMonth()]+' '+td.getDate();}
+  else if(r.v==='calendar'){t='Calendar';eb='Shoots, banks and releases';}
+  else if(r.v==='runway'){t='Runway';eb=target()+' banked before launch';}
+  else if(r.v==='episodes'){t='Episodes';eb=eps().length+' in the plan · '+bankedCount()+' banked';}
+  else if(r.v==='episode'){var e=S.episodes[r.id];back=['#episodes','Episodes'];t=e?shortName(e):'Episode';eb=e?'Episode '+String(e.prod).padStart(2,'0')+' of '+eps().length:'Episodes';}
+  else if(r.v==='ideas'){t='Ideas';eb='Ideas only · no scripts';}
+  else if(r.v==='queue'){t='Queue';eb='Greenlit · waiting for a slot';}
+  else if(r.v==='idea'){var i=S.ideas[r.id],qp=i?queuePos(i):0;back=qp?['#queue','Queue']:['#ideas','Ideas'];t=i?i.title:'Idea';eb=i?series(i.series).name:'Ideas';}
+  else if(r.v==='trips'){t='Trips';eb='One trip · several episodes';}
+  else if(r.v==='prompts'){t='Prompts';eb='Reminders, kept here';back=['#today','Today'];}
+  else if(r.v==='settings'){t='Settings';eb='Off The Map · production';}
+  var onSet=r.v==='settings';
+  return '<div class="tb-in">'+(back?'<a class="iconbtn tb-back" href="'+back[0]+'" aria-label="Back to '+back[1]+'" data-tip="Back to '+back[1]+'">'+svg('M15 5l-7 7 7 7','')+'</a>':'')+
+    '<div class="tb-titles"><div class="eyebrow">'+esc(eb)+'</div><h1 class="tb-title">'+esc(t)+'</h1></div>'+
+    '<div class="tb-act">'+claudeBtn()+bellBtn()+'<button class="iconbtn" type="button" data-act="settings" aria-pressed="'+onSet+'" aria-label="Settings" data-tip="'+(onSet?'Close settings':'Settings: notifications, reminders, display and account')+'">'+GEAR_SVG+'</button></div></div>';
+}
 /* ---------- Claude chats ---------- */
 var DEFAULT_LINKS=[{id:'project',name:'Off The Map CA project',url:'',note:'The project page: every chat and file'},{id:'appdev',name:'OTM App Developer',url:'https://claude.ai/code/session_01SeKF9eavJ12HGTuzXuskiY',note:'Changes, fixes and new features for this app'}];
 function claudeLinks(){return (S.settings&&Array.isArray(S.settings.claudeLinks))?S.settings.claudeLinks:DEFAULT_LINKS;}
@@ -1023,7 +1059,7 @@ function viewSettings(){
     '<button class="item" type="button" data-act="linkadd" style="color:var(--accent-fg);font-weight:600"><svg class="chev" viewBox="0 0 24 24" style="stroke:currentColor"><path d="M12 5v14M5 12h14"/></svg>Add a chat link</button>';
   colA+=sec('Claude chats','Shortcuts in the chat button at the top of each screen. Episode chats are linked from each episode’s Docs tab. To copy a link, open the chat in Claude and use Share, or copy it from the address bar.',links);
   var colB=sec('Display','Only on this phone.',disp)+sec('Production','Shared by everyone on the team.',prod)+sec('Data & sync','',data)+sec('Account','',acct);
-  return '<div class="wrap"><header class="head"><div><div class="eyebrow">Off The Map · production</div><h1>Settings</h1></div>'+bell()+'</header>'+statusBanner()+(wide()?'<div class="cols">'+'<div class="setcol">'+colA+'</div><div class="setcol">'+colB+'</div></div>':'<div class="setcol">'+colA+colB+'</div>')+'</div>';
+  return '<div class="wrap">'+statusBanner()+(wide()?'<div class="cols">'+'<div class="setcol">'+colA+'</div><div class="setcol">'+colB+'</div></div>':'<div class="setcol">'+colA+colB+'</div>')+'</div>';
 }
 function startScreen(){
   var st=devGet('start','today');
@@ -1061,9 +1097,11 @@ function render(){
   document.body.classList.toggle('nofab',r.v==='settings');
   var html=gate?gate:r.v==='today'?viewToday():r.v==='calendar'?viewCalendar():r.v==='runway'?viewRunway():r.v==='episodes'?viewEpisodes():r.v==='episode'?viewEpisode(r.id):r.v==='ideas'?viewIdeas():r.v==='idea'?viewIdea(r.id):r.v==='queue'?viewQueue():r.v==='trips'?viewTrips():r.v==='settings'?viewSettings():viewPrompts();
   main.innerHTML=html;
+  var tbEl=document.getElementById('topbar'); if(tbEl)tbEl.innerHTML=gate?'':topbarHtml(r);
+  tbEl&&tbEl.classList.toggle('scrolled',main.scrollTop>4);
   if(S.ui.slide){var w=main.querySelector('.wrap');if(w)w.classList.add(S.ui.slide);S.ui.slide=null;}
   var ws=main.querySelector('.weekscroll'), wc=ws&&ws.querySelector('.wk.cur'); if(wc)ws.scrollLeft=wc.offsetLeft;
-  var tabKey={episode:'episodes',calendar:'today',idea:'ideas',queue:'ideas',prompts:''}[r.v]; if(tabKey===undefined)tabKey=r.v;
+  var tabKey={episode:'episodes',calendar:'today',idea:'ideas',queue:'ideas',prompts:'',settings:''}[r.v]; if(tabKey===undefined)tabKey=r.v;
   document.querySelectorAll('.tab').forEach(function(t){if(t.getAttribute('data-tab')===tabKey)t.setAttribute('aria-current','page');else t.removeAttribute('aria-current');});
   var ov=document.getElementById('overlay'); ov.innerHTML=sheet()||claudeSheet();
   applyTips(document);
@@ -1103,7 +1141,7 @@ document.addEventListener('click',function(e){if(lpFired){e.preventDefault();e.s
 document.addEventListener('contextmenu',function(e){if(tipTarget(e.target))e.preventDefault();});
 document.addEventListener('focusin',function(e){var el=tipTarget(e.target);if(!el)return;var fv=false;try{fv=el.matches(':focus-visible');}catch(_){}if(fv)showTip(el);});
 document.addEventListener('focusout',hideTip);
-document.getElementById('main').addEventListener('scroll',hideTip,{passive:true});
+document.getElementById('main').addEventListener('scroll',function(){hideTip();var tb=document.getElementById('topbar');if(tb)tb.classList.toggle('scrolled',this.scrollTop>4);},{passive:true});
 
 /* day changes: the page follows your finger; the next or previous page slides in beside it */
 function setDay(d){S.ui.day=d===today()?null:d;}
@@ -1215,6 +1253,7 @@ document.addEventListener('click',function(ev){
   if(act==='qmove'){var ql=queued(),ix=-1;ql.forEach(function(x,n){if(x.id===id)ix=n;});var j=ix+(+k);if(ix<0||j<0||j>=ql.length)return;var tmp=ql[ix];ql[ix]=ql[j];ql[j]=tmp;ql.forEach(function(x,n){if(x.queue!==n+1){x.queue=n+1;write('ideas/'+x.id,{queue:n+1});}});render();return;}
   if(act==='who'){setWho(k);render();return;}
   if(act==='claude'){S.ui.claude=true;render();return;}
+  if(act==='settings'){if(route().v==='settings'){location.hash=S.ui.beforeSettings||'#today';}else{S.ui.beforeSettings=location.hash||'#today';location.hash='#settings';}return;}
   if(act==='closeclaude'){if(b.classList.contains('scrim')&&ev.target!==b)return;S.ui.claude=false;if(b.tagName!=='A')ev.preventDefault();render();return;}
   if(act==='chatedit'){S.ui.chatEdit=id;render();setTimeout(function(){var t=document.getElementById('chat-in');if(t)t.focus();},30);return;}
   if(act==='chatclear'){var cc=(S[col]||{})[id];if(!cc)return;var was0=cc.chat;cc.chat='';S.ui.chatEdit=null;render();write(col+'/'+id,{chat:''});toast('Chat link removed','Undo',function(){cc.chat=was0;render();write(col+'/'+id,{chat:was0});});return;}
@@ -1297,7 +1336,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='10';
+var APP_VERSION='11';
 S.ui.who=getWho();
 applyTheme();
 startScreen();

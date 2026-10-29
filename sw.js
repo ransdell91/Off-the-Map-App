@@ -1,7 +1,7 @@
 // Off The Map: offline support.
 // The app shell is cached so the app opens without a connection.
 // Your data is never cached here; the app keeps its own copy of your last-loaded plan.
-const VERSION = 'otm-v10';
+const VERSION = 'otm-v11';
 const SHELL = [
   './',
   './index.html',
