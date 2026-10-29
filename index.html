@@ -210,8 +210,9 @@ button.item,a.item{cursor:pointer}
 .daypick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .daypick button{min-height:44px;border-radius:12px;border:1px solid var(--line-strong);background:var(--field);color:var(--ink);cursor:pointer;font-size:14px}
 .daypick button[aria-pressed="true"]{background:var(--accent);color:#FFFFFF;border-color:var(--accent);font-weight:600}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--on-ink);padding:10px 16px;border-radius:12px;font-size:14px;z-index:30}
+.toast{display:flex;align-items:center;gap:14px;max-width:calc(100% - 32px);box-sizing:border-box;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--on-ink);padding:10px 16px;border-radius:12px;font-size:14px;z-index:30}
 @media (min-width:600px){.toast{bottom:32px}}
+.toastbtn{flex:none;background:none;border:0;color:var(--on-ink);font:inherit;font-weight:700;text-decoration:underline;padding:6px 2px;min-height:36px;cursor:pointer}
 /* tips, ticker, day picking, calendar, owners */
 .tip{position:fixed;z-index:40;max-width:min(260px,calc(100vw - 16px));box-sizing:border-box;background:var(--ink);color:var(--on-ink);font-size:13px;line-height:1.35;padding:7px 10px;border-radius:10px;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.25)}
 [data-tip]{-webkit-touch-callout:none}
@@ -505,7 +506,9 @@ document.addEventListener('click',function(ev){
   if(a==='change'){S.signin={email:S.signin.email,sent:false,busy:false,msg:''};render();}
   if(a==='signout'&&sb){sb.auth.signOut().then(function(){try{localStorage.removeItem(CACHE_KEY);localStorage.removeItem(OUT_KEY);}catch(e){}S.outbox=[];COLS.forEach(function(k){S[k]={};});S.settings=null;S.session=null;S.dbState='signedout';if(chan){sb.removeChannel(chan);chan=null;}render();});}
 });
-var toastT;function toast(m){var t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},2400);}
+var toastT,toastFn=null;function toast(m,label,fn){var t=document.getElementById('toast');toastFn=fn||null;t.innerHTML='<span>'+esc(m)+'</span>'+(fn?'<button type="button" class="toastbtn">'+esc(label||'Undo')+'</button>':'');t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;toastFn=null;},fn?6000:2400);}
+document.getElementById('toast').addEventListener('click',function(ev){if(!ev.target.closest('.toastbtn')||!toastFn)return;var f=toastFn;toastFn=null;clearTimeout(toastT);document.getElementById('toast').hidden=true;f();});
+function setStage(id,st){var e=S.episodes[id];if(!e)return;e.stage=st;render();write('episodes/'+id,{stage:st});}
 
 /* ---------- views ---------- */
 function route(){var h=(location.hash||'#today').slice(1);if(h.indexOf('episode-')===0)return {v:'episode',id:h.slice(8)};if(h.indexOf('idea-')===0)return {v:'idea',id:h.slice(5)};if(['today','calendar','runway','episodes','ideas','queue','trips','prompts'].indexOf(h)<0)return {v:'today'};return {v:h};}
@@ -693,12 +696,12 @@ function tabChips(extra){
 function episodeBody(e,inPane){
   var d=today(), p=e.stage||'greenlit', pi=sIdx(p), pl=planned(e,d), late=sIdx(p)<sIdx(pl);
   var steps=STAGES.map(function(s,i){return '<li class="'+(i<pi?'past':i===pi?'cur':'')+'" aria-label="'+STAGE_NAME[s]+'"></li>';}).join('');
-  var next=STAGES[pi+1], tab=S.ui.epTab;
+  var next=STAGES[pi+1], prev=pi>0?STAGES[pi-1]:null, tab=S.ui.epTab;
   var sched='<dl class="sched"><dt>RESEARCH</dt><dd>'+fmt(e.start)+'</dd><dt>SCRIPT</dt><dd>'+fmt(addD(e.start,7))+'</dd><dt>PRE-PRO</dt><dd>'+fmt(addD(e.start,14))+'</dd><dt>SHOOT</dt><dd>'+fmt(e.shoot)+' · '+esc(tripName(e.trip))+'</dd><dt>EDIT</dt><dd>'+fmt(editStartOf(e))+'</dd><dt>BANKED BY</dt><dd>'+fmt(e.bank)+'</dd><dt>RELEASE</dt><dd><strong>'+fmt(e.release)+'</strong>'+(e.releaseNote?'<br><span class="small">'+esc(e.releaseNote)+'</span>':'')+'</dd></dl>';
   var flags=(e.flags||[]).length?'<div class="card"><span class="label">Heads up</span>'+e.flags.map(function(f){return '<span style="font-size:14px">'+esc(f)+'</span>';}).join('')+'</div>':'';
   var etasks=vals(S.tasks).filter(function(t){return t.episode===e.id;}).sort(function(a,b){return a.day<b.day?-1:1;});
   var tasksHtml=etasks.length?'<div class="group">'+etasks.map(function(t){return taskRow(t,true);}).join('')+'</div>':'<div class="empty">No tasks yet for this episode.</div>';
-  var weekCard='<div class="card"><div class="row" style="justify-content:space-between;align-items:baseline"><span style="font-weight:600">'+(pl==='greenlit'?'Starts '+fmt(e.start):STAGE_NAME[pl]+' this week')+'</span>'+(late?'<span class="pill warn" data-tip="The stage you marked is behind where the schedule says this episode should be">Behind</span>':'<span class="pill blue" data-tip="The marked stage matches the schedule">On track</span>')+'</div>'+(next?'<button class="btn quiet" type="button" data-act="advance" data-id="'+esc(e.id)+'" data-tip="Move this episode to the next stage when this stage’s work is done">Mark as '+esc(STAGE_NAME[next])+'</button>':'')+'</div>';
+  var weekCard='<div class="card"><div class="row" style="justify-content:space-between;align-items:baseline"><span style="font-weight:600">'+(pl==='greenlit'?'Starts '+fmt(e.start):STAGE_NAME[pl]+' this week')+'</span>'+(late?'<span class="pill warn" data-tip="The stage you marked is behind where the schedule says this episode should be">Behind</span>':'<span class="pill blue" data-tip="The marked stage matches the schedule">On track</span>')+'</div>'+((next||prev)?'<div class="row" style="gap:8px">'+(prev?'<button class="btn quiet" type="button" data-act="retreat" data-id="'+esc(e.id)+'" aria-label="Move back to '+esc(STAGE_NAME[prev])+'" data-tip="Undo: move this episode back to '+esc(STAGE_NAME[prev])+'" style="flex:none;width:auto;padding:0 14px">‹ '+esc(STAGE_NAME[prev])+'</button>':'')+(next?'<button class="btn quiet" type="button" data-act="advance" data-id="'+esc(e.id)+'" data-tip="Move this episode to the next stage when this stage’s work is done" style="flex:1">Mark as '+esc(STAGE_NAME[next])+'</button>':'')+'</div>':'')+'</div>';
   var main={overview:weekCard+sched+flags,shots:shotsBlock(e,'episodes'),docs:docsBlock(e),tasks:tasksHtml}[tab]||'';
   var head=(inPane?'':'<a class="back" href="#episodes" data-tip="Back to all episodes"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Episodes</a>')+
     '<header style="display:flex;flex-direction:column;gap:6px"><div class="eyebrow">'+esc(series(e.series).name)+' · '+esc(tripName(e.trip))+'</div><h1 style="font-size:'+(inPane?'28px':'30px')+';line-height:1.12">'+esc(e.title)+'</h1><p class="sub" style="margin:0">'+esc(e.logline||e.hook)+'</p></header>'+
@@ -973,7 +976,7 @@ document.addEventListener('click',function(ev){
   if(act==='task'){var t=S.tasks[id];if(!t)return;t.done=!t.done;render();write('tasks/'+id,{done:t.done});return;}
   if(act==='owner'){var t2=S.tasks[id];if(!t2)return;var nx={producer:'host',host:'both',both:'producer'}[t2.who||'both']||'producer';t2.who=nx;render();write('tasks/'+id,{who:nx},'Reassigned to '+whoName(nx));return;}
   if(act==='gate'){var e=(S[col]||{})[id];if(!e)return;e.gate=Object.assign({},e.gate);e.gate[k]=!e.gate[k];render();var p={gate:{}};p.gate[k]=e.gate[k];write(col+'/'+id,p);return;}
-  if(act==='advance'){var e2=S.episodes[id];if(!e2)return;var n=STAGES[sIdx(e2.stage||'greenlit')+1];if(!n)return;e2.stage=n;render();write('episodes/'+id,{stage:n},'Moved to '+STAGE_NAME[n]);return;}
+  if(act==='advance'||act==='retreat'){var e2=S.episodes[id];if(!e2)return;var was=e2.stage||'greenlit';var n=STAGES[sIdx(was)+(act==='advance'?1:-1)];if(!n)return;setStage(id,n);toast((act==='advance'?'Moved to ':'Moved back to ')+STAGE_NAME[n],'Undo',function(){setStage(id,was);toast('Back to '+STAGE_NAME[was]);});return;}
   if(act==='delshot'){var e3=(S[col]||{})[id];if(!e3)return;var sh=(e3.shots||[]).slice();sh.splice(+k,1);e3.shots=sh;render();write(col+'/'+id,{shots:sh});return;}
   if(act==='pack'){var tr=S.trips[id];tr.pack=Object.assign({},tr.pack);tr.pack[k]=!tr.pack[k];render();var pp={pack:{}};pp.pack[k]=tr.pack[k];write('trips/'+id,pp);return;}
   if(act==='prompt'){if(!S.settings)return;var P=Object.assign({},S.settings.prompts);P[k]=!P[k];S.settings=Object.assign({},S.settings,{prompts:P});render();var q={prompts:{}};q.prompts[k]=P[k];write('config/settings',q);return;}
@@ -1027,7 +1030,7 @@ lastWide=wide();
 S.ui.who=getWho();
 render();
 start();
-var APP_VERSION='5';
+var APP_VERSION='6';
 /* Updates: check for a new version whenever the app comes back to the front, and reload into it automatically. */
 if('serviceWorker' in navigator){
   var hadCtrl=!!navigator.serviceWorker.controller, reloading=false;
