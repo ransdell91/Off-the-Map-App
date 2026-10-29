@@ -528,7 +528,7 @@ function setStage(id,st){var e=S.episodes[id];if(!e)return;e.stage=st;render();w
 function route(){var h=(location.hash||'#today').slice(1);if(h.indexOf('episode-')===0)return {v:'episode',id:h.slice(8)};if(h.indexOf('idea-')===0)return {v:'idea',id:h.slice(5)};if(['today','calendar','runway','episodes','ideas','queue','trips','prompts','settings'].indexOf(h)<0)return {v:'today'};return {v:h};}
 function wide(){return window.matchMedia('(min-width:600px)').matches;}
 
-function bell(){var n=unread();return '<a class="iconbtn" href="#prompts" aria-label="Prompts'+(n?', '+n+' new':'')+'" data-tip="Daily prompts from Claude'+(n?' · '+n+' unread':'')+'"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4"/></svg>'+(n?'<span class="badge">'+n+'</span>':'')+'</a>';}
+function bell(){var n=unread();return '<span class="row" style="gap:2px;flex:none">'+claudeBtn()+'<a class="iconbtn" href="#prompts" aria-label="Prompts'+(n?', '+n+' new':'')+'" data-tip="Daily prompts from Claude'+(n?' · '+n+' unread':'')+'"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4"/></svg>'+(n?'<span class="badge">'+n+'</span>':'')+'</a></span>';}
 function statusBanner(){
   var n=S.outbox.length, pend=n?(n===1?'1 change':n+' changes'):'';
   if(S.dbState==='offline')return '<div class="notice"><span class="dot"></span>You’re offline. Showing your plan as of '+esc(S.cachedAt?fmt(S.cachedAt.slice(0,10),false)+' '+S.cachedAt.slice(11,16)+' UTC':'your last visit')+'.'+(n?' '+pend+' saved on this phone, sending when you’re back online.':' Changes save once you’re back online.')+'</div>';
@@ -700,7 +700,7 @@ function shotsBlock(e,col){
 }
 function docsBlock(e){
   var docs=function(k,label){var u=(e.docs||{})[k];return '<'+(u?'a href="'+esc(u)+'" target="_blank" rel="noopener" data-tip="Open the '+label.toLowerCase()+' doc"':'div')+' class="item"><span class="thumb" style="background:var(--sand);color:var(--ink);font-size:14px;font-family:var(--f-mono)">'+(k==='research'?'R':'S')+'</span><span class="grow"><span style="font-weight:600">'+label+'</span><span class="small">'+(u?'Synced from Claude':'Not synced yet. In a project chat, ask Claude to sync it here.')+'</span></span>'+(u?svg(CHEV):'')+'</'+(u?'a':'div')+'>';};
-  return '<section style="display:flex;flex-direction:column;gap:8px"><p class="label">Docs · synced with Claude</p><div class="group">'+docs('research','Research notes')+docs('script','Script')+'</div>'+(e.notes?'<div class="card"><span class="label">Notes</span><span style="white-space:pre-wrap;font-size:14px">'+esc(e.notes)+'</span></div>':'')+'</section>';
+  return '<section style="display:flex;flex-direction:column;gap:8px"><p class="label">Docs · synced with Claude</p><div class="group">'+chatRow(e,e.status?'ideas':'episodes')+docs('research','Research notes')+docs('script','Script')+'</div>'+(e.notes?'<div class="card"><span class="label">Notes</span><span style="white-space:pre-wrap;font-size:14px">'+esc(e.notes)+'</span></div>':'')+'</section>';
 }
 var TAB_TIP={overview:'Schedule, status and heads-up notes',shots:'The shot list for the trip',docs:'Research notes and script synced from Claude',tasks:'Every task tied to this one'};
 function tabChips(extra){
@@ -719,7 +719,7 @@ function episodeBody(e,inPane){
   var main={overview:weekCard+sched+flags,shots:shotsBlock(e,'episodes'),docs:docsBlock(e),tasks:tasksHtml}[tab]||'';
   var head=(inPane?'':'<a class="back" href="#episodes" data-tip="Back to all episodes"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Episodes</a>')+
     '<header style="display:flex;flex-direction:column;gap:6px"><div class="eyebrow">'+esc(series(e.series).name)+' · '+esc(tripName(e.trip))+'</div><h1 style="font-size:'+(inPane?'28px':'30px')+';line-height:1.12">'+esc(e.title)+'</h1><p class="sub" style="margin:0">'+esc(e.logline||e.hook)+'</p></header>'+
-    '<ol class="steps" aria-label="Stage: '+STAGE_NAME[p]+'">'+steps+'</ol><div class="small" style="margin-top:-8px"><strong style="color:var(--link)">'+STAGE_NAME[p]+'</strong> · episode '+String(e.prod).padStart(2,'0')+' of '+eps().length+'</div>'+tabChips('');
+    '<ol class="steps" aria-label="Stage: '+STAGE_NAME[p]+'">'+steps+'</ol><div class="small" style="margin-top:-8px"><strong style="color:var(--link)">'+STAGE_NAME[p]+'</strong> · episode '+String(e.prod).padStart(2,'0')+' of '+eps().length+'</div>'+tabChips(e.chat?'<a class="chip go" href="'+esc(e.chat)+'" target="_blank" rel="noopener" data-tip="Open this episode’s chat in Claude">Claude chat ↗</a>':'');
   if(inPane||wide())return head+'<div class="cols"><div>'+main+'</div><div>'+gateBlock(e,'episodes')+(tab!=='docs'?docsBlock(e):'')+'</div></div>';
   return head+main+(tab==='overview'?gateBlock(e,'episodes')+docsBlock(e):'');
 }
@@ -816,6 +816,35 @@ function viewPrompts(){
   return '<div class="wrap" style="max-width:700px"><a class="back" href="#today" data-tip="Back to Today"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Today</a><header class="head" style="padding-top:0"><h1>Prompts</h1>'+(list.some(function(p){return !p.read;})?'<button class="btn quiet" type="button" data-act="readall" data-tip="Mark every prompt as read">Mark all read</button>':'')+'</header>'+body+'<a class="linkbtn small" href="#settings" style="margin-top:8px">Reminder settings</a></div>';
 }
 
+/* ---------- Claude chats ---------- */
+var DEFAULT_LINKS=[{id:'project',name:'Off The Map CA project',url:'',note:'The project page: every chat and file'},{id:'appdev',name:'OTM App Developer',url:'https://claude.ai/code/session_01SeKF9eavJ12HGTuzXuskiY',note:'Changes, fixes and new features for this app'}];
+function claudeLinks(){return (S.settings&&Array.isArray(S.settings.claudeLinks))?S.settings.claudeLinks:DEFAULT_LINKS;}
+function saveLinks(list,msg){if(!S.settings)return;S.settings=Object.assign({},S.settings,{claudeLinks:list});render();write('config/settings',{claudeLinks:list},msg);}
+function okUrl(u){return /^https:\/\/\S+$/i.test(u||'');}
+var CHAT_SVG='<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>';
+function claudeBtn(){return '<button class="iconbtn" type="button" data-act="claude" aria-label="Claude chats" data-tip="Open your Claude chats: the project, this app’s chat and each episode’s chat">'+CHAT_SVG+'</button>';}
+function linkRow(href,title,sub,mono){
+  return href?'<a class="item" href="'+esc(href)+'" target="_blank" rel="noopener" data-tip="Open '+esc(title)+' in Claude"><span class="thumb" style="background:var(--deep);color:var(--deep-fg);font-family:var(--f-mono);font-size:13px">'+esc(mono)+'</span><span class="grow"><span style="font-weight:600">'+esc(title)+'</span><span class="small">'+esc(sub)+'</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></a>'
+    :'<a class="item" href="#settings" data-act="closeclaude" data-tip="Add this link in Settings"><span class="thumb" style="background:var(--sand);color:var(--muted);font-family:var(--f-mono);font-size:13px">'+esc(mono)+'</span><span class="grow"><span style="font-weight:600">'+esc(title)+'</span><span class="small">No link yet. Tap to add it in Settings.</span></span></a>';
+}
+function claudeSheet(){
+  if(!S.ui.claude)return '';
+  var shared=claudeLinks().map(function(l){return linkRow(l.url,l.name,l.note||'Claude chat',l.id==='project'?'P':'C');}).join('');
+  var cur=today(), withChat=eps().filter(function(e){return e.chat;});
+  var active=eps().filter(function(e){var p=planned(e,cur);return p!=='greenlit'&&p!=='published'&&p!=='banked';});
+  var epRows=eps().filter(function(e){return e.chat||active.indexOf(e)>=0;}).sort(function(a,b){return a.prod-b.prod;}).map(function(e){
+    return e.chat?linkRow(e.chat,shortName(e),'Episode '+String(e.prod).padStart(2,'0')+' chat',String(e.prod).padStart(2,'0')):
+      '<a class="item" href="#episode-'+esc(e.id)+'" data-act="closeclaude" data-tip="Open this episode to add its chat link"><span class="thumb" style="background:var(--sand);color:var(--muted);font-family:var(--f-mono);font-size:13px">'+String(e.prod).padStart(2,'0')+'</span><span class="grow"><span style="font-weight:600">'+esc(shortName(e))+'</span><span class="small">In progress · no chat linked yet. Tap to add one on the Docs tab.</span></span></a>';}).join('');
+  return '<div class="scrim" data-act="closeclaude"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cl-t" style="display:flex;flex-direction:column;gap:14px"><div class="grab"></div><div class="row" style="justify-content:space-between"><h2 id="cl-t" style="font-size:20px">Claude</h2><button type="button" class="btn quiet" data-act="closeclaude" style="border:0;background:transparent;color:var(--link);padding:0">Done</button></div>'+
+    '<div class="group">'+shared+'</div>'+
+    '<p class="label" style="margin:2px 0 -6px">Episode chats</p>'+(epRows?'<div class="group">'+epRows+'</div>':'<div class="empty" style="padding:16px">Link an episode’s chat from its Docs tab and it shows up here.</div>')+
+    '<a class="linkbtn small" href="#settings" data-act="closeclaude" style="align-self:flex-start">Edit links in Settings</a></div></div>';
+}
+function chatRow(e,col){
+  var editing=S.ui.chatEdit===e.id;
+  if(e.chat&&!editing)return '<div class="item" style="padding:0;gap:0"><a class="item" href="'+esc(e.chat)+'" target="_blank" rel="noopener" style="border:0;flex:1;min-width:0" data-tip="Open this '+(col==='ideas'?'idea':'episode')+'’s chat in Claude"><span class="thumb" style="background:var(--deep);color:var(--deep-fg);font-size:14px;font-family:var(--f-mono)">C</span><span class="grow"><span style="font-weight:600">Claude chat</span><span class="small">Open the chat for '+esc(col==='ideas'?e.title:shortName(e))+'</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></a><button class="linkbtn small" type="button" data-act="chatedit" data-id="'+esc(e.id)+'" style="padding:0 14px">Edit</button></div>';
+  return '<form class="item" data-form="chatlink" data-col="'+col+'" data-id="'+esc(e.id)+'" style="flex-wrap:wrap;gap:8px"><span class="thumb" style="background:var(--sand);color:var(--ink);font-size:14px;font-family:var(--f-mono)">C</span><span class="grow" style="min-width:160px"><span style="font-weight:600">Claude chat</span><span class="small">In the Claude app, open this '+(col==='ideas'?'idea':'episode')+'’s chat, tap Share or copy its link, and paste it here.</span></span><input id="chat-in" class="set-in" type="url" inputmode="url" placeholder="https://claude.ai/chat/…" value="'+esc(e.chat||'')+'" style="flex:1 1 220px"><button class="btn" type="submit">Save</button>'+(e.chat?'<button class="btn quiet" type="button" data-act="chatclear" data-col="'+col+'" data-id="'+esc(e.id)+'">Remove</button>':'')+'</form>';
+}
 /* ---------- settings ---------- */
 var VAPID_PUB='BL98o8ROEHRAVJvMANvAVuL76YOzwSh7vW7KC1UxArGIdyRomq4mbyCENXUyHxKRgaiglv5V_677VNqWjo822a0';
 var WEEK=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -972,6 +1001,9 @@ function viewSettings(){
   var acct='<div class="item"><span class="grow"><span style="font-weight:500">Signed in</span><span class="small">'+esc(S.session&&S.session.user?S.session.user.email:'')+'</span></span><button class="btn quiet" type="button" data-sact="signout">Sign out</button></div>'+
     '<div class="item"><span class="grow"><span style="font-weight:500">App version '+APP_VERSION+'</span><span class="small">Updates install on their own when you reopen the app.</span></span><button class="btn quiet" type="button" data-act="checkupdate">Check now</button></div>';
   var colA=sec('Notifications','Reminders arrive on this phone even when the app is closed.',n)+sec('Reminder schedule','Shared by everyone on the team. Each phone only gets its own tasks.',r)+'<section class="setsec"><h2>Your reminders</h2><p class="sub" style="margin:0">One-off or repeating nudges, like backups or outreach follow-ups.</p>'+(S.ui.rem?remForm():'')+'<div class="group">'+custom+'</div></section>';
+  var links=claudeLinks().map(function(l){return '<div class="item" style="flex-direction:column;align-items:stretch;gap:8px"><div class="row" style="gap:8px"><input class="set-in" style="flex:1;font-weight:600" data-link="'+esc(l.id)+':name" value="'+esc(l.name)+'" placeholder="Name, e.g. Salmon research" aria-label="Link name" maxlength="40">'+(l.url?'<a class="iconbtn" href="'+esc(l.url)+'" target="_blank" rel="noopener" aria-label="Open '+esc(l.name)+'"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></a>':'')+'<button class="iconbtn" type="button" data-act="linkdel" data-id="'+esc(l.id)+'" aria-label="Remove '+esc(l.name)+'"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div><input class="set-in" type="url" inputmode="url" data-link="'+esc(l.id)+':url" value="'+esc(l.url)+'" placeholder="Paste the link: https://claude.ai/…" aria-label="Link for '+esc(l.name)+'"></div>';}).join('')+
+    '<button class="item" type="button" data-act="linkadd" style="color:var(--accent-fg);font-weight:600"><svg class="chev" viewBox="0 0 24 24" style="stroke:currentColor"><path d="M12 5v14M5 12h14"/></svg>Add a chat link</button>';
+  colA+=sec('Claude chats','Shortcuts in the chat button at the top of each screen. Episode chats are linked from each episode’s Docs tab. To copy a link, open the chat in Claude and use Share, or copy it from the address bar.',links);
   var colB=sec('Display','Only on this phone.',disp)+sec('Production','Shared by everyone on the team.',prod)+sec('Data & sync','',data)+sec('Account','',acct);
   return '<div class="wrap"><header class="head"><div><div class="eyebrow">Off The Map · production</div><h1>Settings</h1></div>'+bell()+'</header>'+statusBanner()+(wide()?'<div class="cols">'+'<div class="setcol">'+colA+'</div><div class="setcol">'+colB+'</div></div>':'<div class="setcol">'+colA+colB+'</div>')+'</div>';
 }
@@ -1015,7 +1047,7 @@ function render(){
   var ws=main.querySelector('.weekscroll'), wc=ws&&ws.querySelector('.wk.cur'); if(wc)ws.scrollLeft=wc.offsetLeft;
   var tabKey={episode:'episodes',calendar:'today',idea:'ideas',queue:'ideas',prompts:''}[r.v]; if(tabKey===undefined)tabKey=r.v;
   document.querySelectorAll('.tab').forEach(function(t){if(t.getAttribute('data-tab')===tabKey)t.setAttribute('aria-current','page');else t.removeAttribute('aria-current');});
-  var ov=document.getElementById('overlay'); ov.innerHTML=sheet();
+  var ov=document.getElementById('overlay'); ov.innerHTML=sheet()||claudeSheet();
   applyTips(document);
   if(aid){var el=document.getElementById(aid);if(el){el.focus();try{if(sel!=null)el.setSelectionRange(sel,sel);}catch(e){}}}
 }
@@ -1165,6 +1197,12 @@ document.addEventListener('click',function(ev){
   if(act==='unqueue'){var i2=S.ideas[id];if(!i2)return;i2.status='idea';i2.queue=null;render();write('ideas/'+id,{status:'idea',queue:null},'Taken out of the queue');return;}
   if(act==='qmove'){var ql=queued(),ix=-1;ql.forEach(function(x,n){if(x.id===id)ix=n;});var j=ix+(+k);if(ix<0||j<0||j>=ql.length)return;var tmp=ql[ix];ql[ix]=ql[j];ql[j]=tmp;ql.forEach(function(x,n){if(x.queue!==n+1){x.queue=n+1;write('ideas/'+x.id,{queue:n+1});}});render();return;}
   if(act==='who'){setWho(k);render();return;}
+  if(act==='claude'){S.ui.claude=true;render();return;}
+  if(act==='closeclaude'){if(b.classList.contains('scrim')&&ev.target!==b)return;S.ui.claude=false;if(b.tagName!=='A')ev.preventDefault();render();return;}
+  if(act==='chatedit'){S.ui.chatEdit=id;render();setTimeout(function(){var t=document.getElementById('chat-in');if(t)t.focus();},30);return;}
+  if(act==='chatclear'){var cc=(S[col]||{})[id];if(!cc)return;var was0=cc.chat;cc.chat='';S.ui.chatEdit=null;render();write(col+'/'+id,{chat:''});toast('Chat link removed','Undo',function(){cc.chat=was0;render();write(col+'/'+id,{chat:was0});});return;}
+  if(act==='linkadd'){var L=claudeLinks().slice();L.push({id:'l'+Date.now().toString(36),name:'',url:'',note:''});S.ui.linkFocus=L[L.length-1].id;saveLinks(L);setTimeout(function(){var t=document.querySelector('[data-link="'+S.ui.linkFocus+':name"]');if(t)t.focus();},40);return;}
+  if(act==='linkdel'){var L2=claudeLinks(),gone=L2.filter(function(x){return x.id===id;})[0];saveLinks(L2.filter(function(x){return x.id!==id;}));toast('Link removed','Undo',function(){saveLinks(claudeLinks().concat([gone]));});return;}
   if(act==='pushon'){pushEnable();return;}
   if(act==='pushoff'){pushDisable();return;}
   if(act==='pushrole'){pushRole(k);return;}
@@ -1209,6 +1247,7 @@ function onSettingChange(el){
     setSettings(patch); toast('Saved'); return;
   }
   if((k=el.getAttribute('data-dev'))){devSet(k,el.value);toast('Saved');return;}
+  if((k=el.getAttribute('data-link'))){var lid=k.split(':')[0],fld=k.split(':')[1],val=el.value.trim();if(fld==='url'&&val&&!okUrl(val)){toast('Paste the full link, starting with https://');return;}var L3=claudeLinks().map(function(x){if(x.id!==lid)return x;var y=Object.assign({},x);y[fld]=val;return y;});if(JSON.stringify(L3)===JSON.stringify(claudeLinks()))return;saveLinks(L3,'Saved');return;}
   if((k=el.getAttribute('data-team'))){var nm=el.value.trim();if(!nm||!S.settings)return;if(team().some(function(t){return t.id===k&&t.name===nm;}))return;var tm=team().map(function(t){return t.id===k?Object.assign({},t,{name:nm}):t;});S.settings=Object.assign({},S.settings,{team:tm});render();write('config/settings',{team:tm},'Saved');return;}
 }
 document.addEventListener('input',function(ev){
@@ -1219,6 +1258,7 @@ document.addEventListener('input',function(ev){
 document.addEventListener('submit',function(ev){
   var f=ev.target.closest('[data-form]'); if(!f)return; ev.preventDefault();
   var kind=f.getAttribute('data-form');
+  if(kind==='chatlink'){var cc2=f.getAttribute('data-col'),ci=f.getAttribute('data-id'),ce=(S[cc2]||{})[ci],u=(f.querySelector('input').value||'').trim();if(!ce)return;if(!okUrl(u)){toast('Paste the full link, starting with https://');return;}ce.chat=u;S.ui.chatEdit=null;render();write(cc2+'/'+ci,{chat:u},'Chat linked');return;}
   if(kind==='shot'){var col=f.getAttribute('data-col')||'episodes';var inp=f.querySelector('input');var v=inp.value.trim();if(!v)return;var e=(S[col]||{})[f.getAttribute('data-id')];if(!e)return;var sh=(e.shots||[]).concat([v]);e.shots=sh;inp.value='';render();write(col+'/'+e.id,{shots:sh});var ni=document.getElementById('shot-in');if(ni)ni.focus();return;}
   if(kind==='add'){
     var a=S.ui.add, text=(document.getElementById('qa-text').value||'').trim(); if(!text){toast('Type something first.');return;}
@@ -1233,14 +1273,14 @@ document.addEventListener('submit',function(ev){
   }
 });
 document.addEventListener('keydown',function(ev){
-  if(ev.key==='Escape'){hideTip();if(S.ui.add){S.ui.add=null;render();}return;}
+  if(ev.key==='Escape'){hideTip();if(S.ui.add||S.ui.claude){S.ui.add=null;S.ui.claude=false;render();}return;}
   if((ev.key==='ArrowLeft'||ev.key==='ArrowRight')&&route().v==='calendar'&&!S.ui.add&&!/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement||{}).tagName||'')){shiftMonth(ev.key==='ArrowRight'?1:-1);return;}
   if((ev.key==='ArrowLeft'||ev.key==='ArrowRight')&&route().v==='today'&&!S.ui.add&&!/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement||{}).tagName||'')){shiftDay(ev.key==='ArrowRight'?1:-1);}
 });
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='7';
+var APP_VERSION='8';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
