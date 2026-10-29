@@ -351,61 +351,116 @@ function unread(){return vals(S.prompts).filter(function(p){return !p.read;}).le
 
 /* ---------- data (Supabase) ---------- */
 var SB_URL='https://fbskjgluladhqocklyre.supabase.co', SB_KEY='sb_publishable_rJg33Y3FlK_3lCIPW1jQ8Q_VAjcEUXp';
-var COLS=['episodes','ideas','trips','tasks','prompts'], CACHE_KEY='otm-cache-v1', sb=null, chan=null, rT=null;
-S.session=null; S.signin={email:'',sent:false,busy:false,msg:''}; S.cachedAt=null;
+var COLS=['episodes','ideas','trips','tasks','prompts'], CACHE_KEY='otm-cache-v1', OUT_KEY='otm-outbox-v1', sb=null, chan=null, rT=null;
+S.session=null; S.signin={email:'',sent:false,busy:false,msg:''}; S.cachedAt=null; S.outbox=[]; S.saveErr=false;
+/* Changes are saved on the phone first (the outbox), then sent to Supabase in order and retried until they land. */
+function jm(a,b){if(!a||typeof a!=='object'||Array.isArray(a)||!b||typeof b!=='object'||Array.isArray(b))return b;var r=Object.assign({},a);Object.keys(b).forEach(function(k){r[k]=jm(r[k],b[k]);});return r;}
+function timed(p,ms){return Promise.race([p,new Promise(function(_,rej){setTimeout(function(){rej({timeout:true,message:'timeout'});},ms);})]);}
 function applyRow(r){
   if(!r||!r.col)return;
   if(r.col==='config'){if(r.id==='settings')S.settings=r.data||null;return;}
   if(COLS.indexOf(r.col)<0)return;
   var v=Object.assign({},r.data); v.id=r.id; S[r.col][r.id]=v;
 }
+function applyOp(o){
+  if(o.col==='config'){if(o.id==='settings')S.settings=o.k==='insert'?o.data:jm(S.settings||{},o.patch);return;}
+  if(!S[o.col])return;
+  if(o.k==='insert'){var v=Object.assign({},o.data);v.id=o.id;S[o.col][o.id]=v;}
+  else if(S[o.col][o.id]){var m=jm(S[o.col][o.id],o.patch);m.id=o.id;S[o.col][o.id]=m;}
+}
+function reapply(col,id){S.outbox.forEach(function(o){if(!col||(o.col===col&&o.id===id))applyOp(o);});}
+function saveOut(){try{localStorage.setItem(OUT_KEY,JSON.stringify(S.outbox));}catch(e){}}
+function loadOut(){try{S.outbox=JSON.parse(localStorage.getItem(OUT_KEY)||'[]')||[];}catch(e){S.outbox=[];}}
 function saveCache(){try{var c={at:new Date().toISOString(),settings:S.settings};COLS.forEach(function(k){c[k]=S[k];});localStorage.setItem(CACHE_KEY,JSON.stringify(c));}catch(e){}}
 function loadCache(){try{var c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');if(!c)return false;COLS.forEach(function(k){S[k]=c[k]||{};});S.settings=c.settings||null;S.cachedAt=c.at;return true;}catch(e){return false;}}
 function soon(){clearTimeout(rT);rT=setTimeout(function(){if(S.ui.add)keepText();render();},120);}
-async function loadAll(){
-  var all=[],from=0;
-  while(true){var res=await sb.from('items').select('col,id,data').order('col').order('id').range(from,from+999);if(res.error)throw res.error;all=all.concat(res.data);if(res.data.length<1000)break;from+=1000;}
-  if(!all.length){var m=await sb.rpc('otm_is_member');if(!m.error&&m.data===false){S.dbState='denied';render();return;}}
-  COLS.forEach(function(k){S[k]={};}); S.settings=null; all.forEach(applyRow);
-  S.dbState='ready'; S.cachedAt=null; saveCache(); render();
+var loading=null;
+function loadAll(){
+  if(loading)return loading;
+  loading=(async function(){
+    var all=[],from=0;
+    while(true){var res=await timed(sb.from('items').select('col,id,data').order('col').order('id').range(from,from+999),20000);if(res.error)throw res.error;all=all.concat(res.data);if(res.data.length<1000)break;from+=1000;}
+    if(!all.length){var m=await timed(sb.rpc('otm_is_member'),15000);if(!m.error&&m.data===false){S.dbState='denied';render();return;}}
+    COLS.forEach(function(k){S[k]={};}); S.settings=null; all.forEach(applyRow);
+    reapply(); /* keep changes that haven't reached the server yet */
+    S.dbState='ready'; S.cachedAt=null; saveCache(); render();
+  })().finally(function(){loading=null;});
+  return loading;
 }
-async function connect(){
-  if(!S.cachedAt)S.dbState='loading';
-  render();
-  try{await loadAll();}catch(e){S.dbState=navigator.onLine===false?'offline':'error';render();return;}
-  if(chan)return;
-  chan=sb.channel('otm-items').on('postgres_changes',{event:'*',schema:'public',table:'items'},function(p){
-    if(p.eventType==='DELETE'){var o=p.old||{};if(o.col&&S[o.col])delete S[o.col][o.id];}
-    else applyRow(p.new);
-    saveCache(); soon();
-  }).subscribe();
+var connecting=null;
+function connect(){
+  if(connecting)return connecting;
+  connecting=(async function(){
+    if(!S.cachedAt)S.dbState='loading';
+    render();
+    try{await loadAll();}catch(e){S.dbState=navigator.onLine===false?'offline':(S.cachedAt?'stale':'error');render();retryLoadLater();flush();return;}
+    flush();
+    if(chan)return;
+    chan=sb.channel('otm-items').on('postgres_changes',{event:'*',schema:'public',table:'items'},function(p){
+      if(p.eventType==='DELETE'){var o=p.old||{};if(o.col&&S[o.col])delete S[o.col][o.id];}
+      else {applyRow(p.new);if(p.new)reapply(p.new.col,p.new.id);}
+      saveCache(); soon();
+    }).subscribe();
+  })().finally(function(){connecting=null;});
+  return connecting;
 }
+var loadRetryT=null;
+function retryLoadLater(){clearTimeout(loadRetryT);loadRetryT=setTimeout(function(){if(sb&&S.session&&S.dbState!=='ready'&&S.dbState!=='denied')connect();},8000);}
+var flushing=false, flushT=null, flushWait=3000;
+function isNetErr(e){return !e||e.timeout||navigator.onLine===false||/fetch|network|load failed|timeout/i.test(String(e.message||e))||!e.code;}
+async function flush(){
+  if(flushing||!sb||!S.session||!S.outbox.length)return;
+  flushing=true; clearTimeout(flushT);
+  try{
+    while(S.outbox.length){
+      var o=S.outbox[0], r;
+      try{
+        r=o.k==='insert'
+          ? await timed(sb.from('items').upsert({col:o.col,id:o.id,data:o.data},{onConflict:'col,id'}),15000)
+          : await timed(sb.rpc('otm_merge',{p_col:o.col,p_id:o.id,p_patch:o.patch}),15000);
+        if(r.error)throw r.error;
+      }catch(e){
+        if(isNetErr(e)){S.saveErr=true;render();flushT=setTimeout(flush,flushWait);flushWait=Math.min(flushWait*2,60000);return;}
+        console.warn('Dropped a change the server refused',o,e); toast('One change couldn’t be saved: '+(e.message||'refused')+'.');
+      }
+      S.outbox.shift(); saveOut();
+    }
+    S.saveErr=false; flushWait=3000; if(S.dbState==='stale'||S.dbState==='error')setTimeout(connect,0); render();
+  } finally {flushing=false;}
+}
+function queueOp(o){S.outbox.push(o);saveOut();applyOp(o);saveCache();render();flush();}
 async function start(){
-  if(loadCache())S.dbState='cached';
+  loadOut();
+  if(loadCache()){S.dbState='cached';reapply();}
   if(!window.supabase){S.dbState=S.cachedAt?'offline':'error';render();return;}
-  sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  /* A pass-through lock: the browser lock in supabase-js can stall on Android and freeze every request. */
+  sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,lock:function(name,timeout,fn){return fn();}}});
   sb.auth.onAuthStateChange(function(ev,session){
     var had=!!S.session; S.session=session;
-    if(session&&!had){S.signin={email:'',sent:false,busy:false,msg:''};connect();}
+    /* Never call Supabase inside this callback; defer it. */
+    if(session&&!had){S.signin={email:'',sent:false,busy:false,msg:''};setTimeout(connect,0);}
     if(!session&&ev==='SIGNED_OUT'){S.dbState='signedout';render();}
   });
-  var g=await sb.auth.getSession(); S.session=g.data&&g.data.session;
-  if(S.session)connect(); else {S.dbState='signedout';render();}
+  var g=await sb.auth.getSession(); var s=g.data&&g.data.session;
+  if(s){S.session=s;connect();} else if(!S.session){S.dbState='signedout';render();}
 }
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&sb&&S.session&&S.dbState!=='denied')loadAll().catch(function(){});});
-window.addEventListener('online',function(){if(sb&&S.session)connect();});
+document.addEventListener('visibilitychange',function(){
+  if(!sb||!S.session||S.dbState==='denied')return;
+  if(document.visibilityState==='visible'){flush();loadAll().catch(function(){});}
+  else flush();
+});
+window.addEventListener('online',function(){if(sb&&S.session){flushWait=3000;flush();connect();}});
 window.addEventListener('offline',function(){if(S.dbState==='ready'){S.dbState='offline';render();}});
-function failMsg(err){return navigator.onLine===false?'You’re offline. That change wasn’t saved.':'That didn’t save. Try again.';}
 function write(path,patch,okMsg){
   if(!sb||!S.session){toast('Sign in to save changes.');return Promise.resolve();}
-  var i=path.indexOf('/'), col=path.slice(0,i), id=path.slice(i+1);
-  return sb.rpc('otm_merge',{p_col:col,p_id:id,p_patch:patch}).then(function(r){if(r.error)throw r.error;if(okMsg)toast(okMsg);saveCache();}).catch(function(e){toast(failMsg(e));});
+  var i=path.indexOf('/'); queueOp({k:'merge',col:path.slice(0,i),id:path.slice(i+1),patch:patch,at:Date.now()});
+  if(okMsg)toast(okMsg); return Promise.resolve();
 }
 function create(col,data,okMsg){
   if(!sb||!S.session){toast('Sign in to save changes.');return Promise.resolve();}
   var id=col.charAt(0)+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  var v=Object.assign({},data);v.id=id;if(S[col])S[col][id]=v;render();
-  return sb.from('items').insert({col:col,id:id,data:data}).then(function(r){if(r.error)throw r.error;if(okMsg)toast(okMsg);saveCache();}).catch(function(e){if(S[col])delete S[col][id];render();toast(failMsg(e));});
+  queueOp({k:'insert',col:col,id:id,data:data,at:Date.now()});
+  if(okMsg)toast(okMsg); return Promise.resolve();
 }
 async function sendLink(email){
   S.signin.busy=true;S.signin.msg='';render();
@@ -443,8 +498,9 @@ document.addEventListener('submit',function(ev){
 document.addEventListener('click',function(ev){
   var b=ev.target.closest('[data-sact]'); if(!b)return; var a=b.getAttribute('data-sact');
   if(a==='resend')sendLink(S.signin.email);
+  if(a==='retry'&&sb&&S.session){flushWait=3000;flush();connect();}
   if(a==='change'){S.signin={email:S.signin.email,sent:false,busy:false,msg:''};render();}
-  if(a==='signout'&&sb){sb.auth.signOut().then(function(){try{localStorage.removeItem(CACHE_KEY);}catch(e){}COLS.forEach(function(k){S[k]={};});S.settings=null;S.session=null;S.dbState='signedout';if(chan){sb.removeChannel(chan);chan=null;}render();});}
+  if(a==='signout'&&sb){sb.auth.signOut().then(function(){try{localStorage.removeItem(CACHE_KEY);localStorage.removeItem(OUT_KEY);}catch(e){}S.outbox=[];COLS.forEach(function(k){S[k]={};});S.settings=null;S.session=null;S.dbState='signedout';if(chan){sb.removeChannel(chan);chan=null;}render();});}
 });
 var toastT;function toast(m){var t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},2400);}
 
@@ -454,9 +510,12 @@ function wide(){return window.matchMedia('(min-width:600px)').matches;}
 
 function bell(){var n=unread();return '<a class="iconbtn" href="#prompts" aria-label="Prompts'+(n?', '+n+' new':'')+'" data-tip="Daily prompts from Claude'+(n?' · '+n+' unread':'')+'"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4"/></svg>'+(n?'<span class="badge">'+n+'</span>':'')+'</a>';}
 function statusBanner(){
-  if(S.dbState==='offline')return '<div class="notice"><span class="dot"></span>You’re offline. Showing your plan as of '+esc(S.cachedAt?fmt(S.cachedAt.slice(0,10),false)+' '+S.cachedAt.slice(11,16)+' UTC':'your last visit')+'. Changes save once you’re back online.</div>';
+  var n=S.outbox.length, pend=n?(n===1?'1 change':n+' changes'):'';
+  if(S.dbState==='offline')return '<div class="notice"><span class="dot"></span>You’re offline. Showing your plan as of '+esc(S.cachedAt?fmt(S.cachedAt.slice(0,10),false)+' '+S.cachedAt.slice(11,16)+' UTC':'your last visit')+'.'+(n?' '+pend+' saved on this phone, sending when you’re back online.':' Changes save once you’re back online.')+'</div>';
+  if(S.dbState==='error')return '<div class="notice warn"><span class="dot"></span>Couldn’t reach your data. Check your connection. <button class="linkbtn" type="button" data-sact="retry" style="color:inherit;text-decoration:underline">Try again</button></div>';
+  if(S.dbState==='stale')return '<div class="notice"><span class="dot"></span>Couldn’t refresh, showing your saved copy. <button class="linkbtn" type="button" data-sact="retry" style="color:inherit;text-decoration:underline">Try again</button></div>';
+  if(n&&S.saveErr)return '<div class="notice"><span class="dot"></span>'+pend+' saved on this phone, waiting to reach the server. <button class="linkbtn" type="button" data-sact="retry" style="color:inherit;text-decoration:underline">Retry now</button></div>';
   if(S.dbState==='cached'||S.dbState==='loading')return S.cachedAt?'<div class="notice"><span class="dot"></span>Syncing…</div>':'';
-  if(S.dbState==='error')return '<div class="notice warn"><span class="dot"></span>Couldn’t reach your data. Check your connection, then pull down or reopen the app.</div>';
   if(S.dbState==='ready'&&!eps().length)return '<div class="empty">Your production plan loads here. Ask Claude in your project chat to load the plan.</div>';
   return '';
 }
@@ -647,7 +706,7 @@ function episodeBody(e,inPane){
 function viewEpisode(id){
   var e=S.episodes[id];
   if(!e)return '<div class="wrap"><a class="back" href="#episodes" data-tip="Back to all episodes"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Episodes</a>'+(S.dbState==='ready'?'<div class="empty">This episode isn’t in the plan.</div>':'<div class="empty">Loading…</div>')+'</div>';
-  return '<div class="wrap">'+episodeBody(e,false)+'</div>';
+  return '<div class="wrap">'+statusBanner()+episodeBody(e,false)+'</div>';
 }
 
 /* ideas and the queue */
@@ -678,7 +737,7 @@ function ideaBody(i){
 function viewIdea(id){
   var i=S.ideas[id];
   if(!i)return '<div class="wrap"><a class="back" href="#ideas" data-tip="Back to all ideas"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Ideas</a>'+(S.dbState==='ready'?'<div class="empty">This idea isn’t in the list.</div>':'<div class="empty">Loading…</div>')+'</div>';
-  return '<div class="wrap">'+ideaBody(i)+'</div>';
+  return '<div class="wrap">'+statusBanner()+ideaBody(i)+'</div>';
 }
 function viewIdeas(){
   var q=S.ui.ideaQuery.toLowerCase(), f=S.ui.ideaSeries, all=vals(S.ideas);
