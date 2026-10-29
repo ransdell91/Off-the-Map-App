@@ -933,7 +933,7 @@ var CHAT_SVG='<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8
 function claudeBtn(){return '<button class="iconbtn" type="button" data-act="claude" aria-label="Claude chats" data-tip="Open your Claude chats: the project, this app’s chat and each episode’s chat">'+CHAT_SVG+'</button>';}
 function linkRow(href,title,sub,mono){
   return href?'<a class="item" href="'+esc(href)+'" target="_blank" rel="noopener" data-tip="Open '+esc(title)+' in Claude"><span class="thumb" style="background:var(--deep);color:var(--deep-fg);font-family:var(--f-mono);font-size:13px">'+esc(mono)+'</span><span class="grow"><span style="font-weight:600">'+esc(title)+'</span><span class="small">'+esc(sub)+'</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></a>'
-    :'<a class="item" href="#settings" data-act="closeclaude" data-tip="Add this link in Settings"><span class="thumb" style="background:var(--sand);color:var(--muted);font-family:var(--f-mono);font-size:13px">'+esc(mono)+'</span><span class="grow"><span style="font-weight:600">'+esc(title)+'</span><span class="small">No link yet. Tap to add it in Settings.</span></span></a>';
+    :'<a class="item" href="#settings-claude" data-act="closeclaude" data-tip="Add this link in Settings"><span class="thumb" style="background:var(--sand);color:var(--muted);font-family:var(--f-mono);font-size:13px">'+esc(mono)+'</span><span class="grow"><span style="font-weight:600">'+esc(title)+'</span><span class="small">No link yet. Tap to add it in Settings.</span></span></a>';
 }
 function claudeSheet(){
   if(!S.ui.claude)return '';
@@ -946,7 +946,7 @@ function claudeSheet(){
   return '<div class="scrim" data-act="closeclaude"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cl-t" style="display:flex;flex-direction:column;gap:14px"><div class="grab"></div><div class="row" style="justify-content:space-between"><h2 id="cl-t" style="font-size:20px">Claude</h2><button type="button" class="btn quiet" data-act="closeclaude" style="border:0;background:transparent;color:var(--link);padding:0">Done</button></div>'+
     '<div class="group">'+shared+'</div>'+
     '<p class="label" style="margin:2px 0 -6px">Episode chats</p>'+(epRows?'<div class="group">'+epRows+'</div>':'<div class="empty" style="padding:16px">Link an episode’s chat from its Docs tab and it shows up here.</div>')+
-    '<a class="linkbtn small" href="#settings" data-act="closeclaude" style="align-self:flex-start">Edit links in Settings</a></div></div>';
+    '<a class="linkbtn small" href="#settings-claude" data-act="closeclaude" style="align-self:flex-start">Edit links in Settings</a></div></div>';
 }
 function chatRow(e,col){
   var editing=S.ui.chatEdit===e.id;
