@@ -689,7 +689,7 @@ function viewToday(){
     (carried.length?'<p class="label" style="margin-top:6px">Carried over</p><div class="group">'+carried.map(function(t){return taskRow(t,true);}).join('')+'</div>':'')+'</section>';
   var up=nd?'<section aria-labelledby="un" style="display:flex;flex-direction:column;gap:10px"><h2 id="un">Up next</h2><button class="card" type="button" data-act="setday" data-k="'+nd+'" style="flex-direction:row;align-items:center;gap:14px;text-align:left;cursor:pointer;width:100%;font:inherit;color:inherit" data-tip="Open '+esc(fmt(nd))+' in the day view"><span class="daychip" style="flex-direction:column;background:var(--sky);color:var(--ink);line-height:1.1"><span>'+DOW[pd(nd).getDay()].toUpperCase()+'</span><span style="font-size:16px;font-weight:700">'+pd(nd).getDate()+'</span></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-weight:600">'+(nextTrip?'Shoot: '+esc(nextTrip.name):esc(nextRole.name))+'</span><span class="small">'+(nextEp?esc(shortName(nextEp)):'No episode in this half yet')+(upcoming.length?' · '+upcoming.length+' tasks':'')+'</span></span>'+svg(CHEV)+'</button></section>':'';
   var backToday=isReal?'':'<button class="btn quiet sm" type="button" data-act="setday" data-k="'+today()+'" data-tip="Jump back to today">Today</button>';
-  return '<div class="wrap">'+weekStrip+'<div class="dayhead"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div style="min-width:0"><div class="eyebrow">'+esc(isReal?'Today · '+fmt(d):fmt(d))+'</div><h2 class="big" style="margin-top:4px">'+esc(title)+'</h2></div>'+backToday+'</div><div class="sub">'+esc(subl)+'</div></div>'+todaySeg('day')+ticker(d)+statusBanner()+'<div class="cols"><div>'+left+'</div><div>'+onLine(d)+up+'</div></div></div>';
+  return '<div class="wrap">'+weekStrip+todaySeg('day')+'<div class="dayhead"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div style="min-width:0"><div class="eyebrow">'+esc(isReal?'Today · '+fmt(d):fmt(d))+'</div><h2 class="big" style="margin-top:4px">'+esc(title)+'</h2></div>'+backToday+'</div><div class="sub">'+esc(subl)+'</div></div>'+ticker(d)+statusBanner()+'<div class="cols"><div>'+left+'</div><div>'+onLine(d)+up+'</div></div></div>';
 }
 
 function onLine(d){
@@ -1423,7 +1423,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='17';
+var APP_VERSION='18';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
