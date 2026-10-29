@@ -241,6 +241,18 @@ button.item,a.item{cursor:pointer}
 .field .set-in{min-height:46px;font-size:16px;padding:0 12px}
 .item select.set-in{max-width:160px}
 .setsec{display:flex;flex-direction:column;gap:8px}
+.setmenu{display:flex;flex-direction:column;gap:8px;min-width:0}
+.setg{margin:10px 4px 0}
+.setg:first-child{margin-top:0}
+.setrow{gap:14px;text-decoration:none;color:inherit;min-height:56px}
+.setrow[aria-current="page"]{background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+.seticon{flex:none;width:34px;height:34px;border-radius:10px;background:var(--deep);color:var(--deep-fg);display:flex;align-items:center;justify-content:center}
+.seticon svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.setsum{flex:none;max-width:45%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.setdetail{display:flex;flex-direction:column;gap:12px;min-width:0}
+.setdetail h2{margin:0}
+.sethd{margin:10px 0 0;font-family:var(--f-display);font-size:19px}
+.setsplit{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr);gap:28px;align-items:start}
 .setcol{display:flex;flex-direction:column;gap:22px;min-width:0}
 .wkpick{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 .wkpick button{min-height:42px;border-radius:10px;border:1px solid var(--line-strong);background:var(--field);color:var(--ink);font-size:13px;cursor:pointer;padding:0}
@@ -599,7 +611,7 @@ var toastT,toastFn=null;function toast(m,label,fn){var t=document.getElementById
 document.getElementById('toast').addEventListener('click',function(ev){if(!ev.target.closest('.toastbtn')||!toastFn)return;var f=toastFn;toastFn=null;clearTimeout(toastT);document.getElementById('toast').hidden=true;f();});
 
 /* ---------- views ---------- */
-function route(){var h=(location.hash||'#today').slice(1);if(h.indexOf('episode-')===0)return {v:'episode',id:h.slice(8)};if(h.indexOf('idea-')===0)return {v:'idea',id:h.slice(5)};if(['today','calendar','runway','episodes','ideas','queue','trips','prompts','settings'].indexOf(h)<0)return {v:'today'};return {v:h};}
+function route(){var h=(location.hash||'#today').slice(1);if(h.indexOf('episode-')===0)return {v:'episode',id:h.slice(8)};if(h.indexOf('idea-')===0)return {v:'idea',id:h.slice(5)};if(h.indexOf('settings-')===0)return {v:'settings',sec:h.slice(9)};if(['today','calendar','runway','episodes','ideas','queue','trips','prompts','settings'].indexOf(h)<0)return {v:'today'};return {v:h};}
 function wide(){return window.matchMedia('(min-width:600px)').matches;}
 
 function bell(){return '';}
@@ -739,7 +751,7 @@ function viewRunway(){
   var teamHtml=team().map(function(t){return '<div class="item" style="align-items:flex-start"><span class="grow"><span class="row" style="justify-content:space-between;gap:8px"><span style="font-weight:600">'+esc(t.name)+'</span>'+(t.share?'<span class="pill">'+esc(t.share)+'</span>':'')+'</span><span class="small">'+esc(t.does||'')+'</span></span></div>';}).join('');
   var P=(S.settings&&S.settings.prompts)||{};
   var pr=[['morning','Morning prompt','Mon, Thu, Fri, Sat · '+(P.morningTime||'08:00')],['night','Night-before heads-up','Sun and Wed · '+(P.nightTime||'19:00')],['behind','Behind-schedule alerts','Added to the morning prompt'],['weekly','Weekly review','Mondays, with the morning prompt']].map(function(p){var on=!!P[p[0]];return '<div class="item"><span class="grow"><span style="font-weight:500">'+p[1]+'</span><span class="small">'+esc(p[2])+'</span></span><button class="switch" type="button" role="switch" aria-checked="'+on+'" aria-label="'+p[1]+'" data-act="prompt" data-k="'+p[0]+'" data-tip="'+p[1]+' · '+esc(p[2])+'. Tap to turn '+(on?'off':'on')+'."><span class="trk"><span class="kn"></span></span></button></div>';}).join('');
-  var rt='<div style="display:flex;flex-direction:column;gap:18px;min-width:0"><section style="display:flex;flex-direction:column;gap:8px"><h2>Every week</h2><p class="sub" style="margin:0">Mon and Thu work the episode you are writing. Fri and Sat work the episode you are making. Every other Monday, the written episode moves to making and a new one starts.</p><div class="group">'+routine+'</div></section><section style="display:flex;flex-direction:column;gap:8px"><h2>Who does what</h2><div class="group">'+teamHtml+'</div></section><section style="display:flex;flex-direction:column;gap:8px"><h2>Reminders</h2><a class="item" href="#settings" data-tip="Open Settings to turn on notifications and set reminder times"><span class="grow"><span style="font-weight:600">Notifications and reminder times</span><span class="small">'+esc(reminderSummary())+'</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></a></section></div>';
+  var rt='<div style="display:flex;flex-direction:column;gap:18px;min-width:0"><section style="display:flex;flex-direction:column;gap:8px"><h2>Every week</h2><p class="sub" style="margin:0">Mon and Thu work the episode you are writing. Fri and Sat work the episode you are making. Every other Monday, the written episode moves to making and a new one starts.</p><div class="group">'+routine+'</div></section><section style="display:flex;flex-direction:column;gap:8px"><h2>Who does what</h2><div class="group">'+teamHtml+'</div></section><section style="display:flex;flex-direction:column;gap:8px"><h2>Reminders</h2><a class="item" href="#settings-reminders" data-tip="Open reminder settings"><span class="grow"><span style="font-weight:600">Notifications and reminder times</span><span class="small">'+esc(reminderSummary())+'</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></a></section></div>';
   var body=w?'<div class="cols">'+line+rt+'</div>':('<div class="seg" role="tablist" aria-label="Runway view"><button type="button" role="tab" aria-selected="'+(tab==='line')+'" data-act="rtab" data-k="line" data-tip="Every episode on the production line and the release calendar">The line</button><button type="button" role="tab" aria-selected="'+(tab==='routine')+'" data-act="rtab" data-k="routine" data-tip="The weekly rhythm, who does what, and prompt settings">Routine</button></div>'+(tab==='line'?line:rt));
   return '<div class="wrap">'+statusBanner()+body+'</div>';
 }
@@ -889,7 +901,7 @@ function tripList(sched,later,cur){
 function viewPrompts(){
   var list=vals(S.prompts).sort(function(a,b){return (b.at||'')<(a.at||'')?-1:1;});
   var body=list.length?'<div class="group">'+list.map(function(p){return '<div class="item" style="align-items:flex-start"><span class="grow"><span class="row" style="justify-content:space-between"><span style="font-weight:'+(p.read?500:700)+'">'+esc(p.title)+'</span><span class="small">'+esc(p.at?fmt(p.at.slice(0,10),true):'')+'</span></span><span style="font-size:14px;color:var(--muted2);white-space:pre-wrap">'+esc(p.body)+'</span></span>'+(p.read?'':'<span class="dot" style="color:var(--pin);margin-top:7px" aria-label="Unread"></span>')+'</div>';}).join('')+'</div>':'<div class="empty">Your daily prompts will collect here once they’re switched on. The first one arrives on your next production morning.</div>';
-  return '<div class="wrap">'+(list.some(function(p){return !p.read;})?'<div class="row" style="justify-content:flex-end"><button class="btn quiet" type="button" data-act="readall" data-tip="Mark every prompt as read">Mark all read</button></div>':'')+''+body+'<a class="linkbtn small" href="#settings" style="margin-top:8px">Reminder settings</a></div>';
+  return '<div class="wrap">'+(list.some(function(p){return !p.read;})?'<div class="row" style="justify-content:flex-end"><button class="btn quiet" type="button" data-act="readall" data-tip="Mark every prompt as read">Mark all read</button></div>':'')+''+body+'<a class="linkbtn small" href="#settings-reminders" style="margin-top:8px">Reminder settings</a></div>';
 }
 
 /* ---------- top bar: the same on every screen ---------- */
@@ -906,7 +918,7 @@ function topbarHtml(r){
   else if(r.v==='idea'){var i=S.ideas[r.id],qp=i?queuePos(i):0;back=qp?['#queue','Queue']:['#ideas','Ideas'];t=i?i.title:'Idea';eb=i?series(i.series).name:'Ideas';}
   else if(r.v==='trips'){t='Trips';eb='One trip · several episodes';}
   else if(r.v==='prompts'){t='Prompts';eb='Reminders, kept here';back=['#today','Today'];}
-  else if(r.v==='settings'){t='Settings';eb='Off The Map · production';}
+  else if(r.v==='settings'){var SN={notifications:'Notifications',display:'Display',reminders:'Reminders',claude:'Claude chats',production:'Production',data:'Data & sync',account:'Account'};if(r.sec&&SN[r.sec]&&!wide()){t=SN[r.sec];eb='Settings';back=['#settings','Settings'];}else{t='Settings';eb='Off The Map · production';}}
   var onSet=r.v==='settings';
   return '<div class="tb-in">'+(back?'<a class="iconbtn tb-back" href="'+back[0]+'" aria-label="Back to '+back[1]+'" data-tip="Back to '+back[1]+'">'+svg('M15 5l-7 7 7 7','')+'</a>':'')+
     '<div class="tb-titles"><div class="eyebrow">'+esc(eb)+'</div><h1 class="tb-title">'+esc(t)+'</h1></div>'+
@@ -1105,12 +1117,30 @@ function viewSettings(){
     '<div class="item"><span class="grow"><span style="font-weight:500">Password</span><span class="small">Sign in with your email and a password instead of an email link.</span></span><button class="btn quiet" type="button" data-act="pwopen">Set password</button></div>';
   var acct=pwRow+'<div class="item"><span class="grow"><span style="font-weight:500">Signed in</span><span class="small">'+esc(S.session&&S.session.user?S.session.user.email:'')+'</span></span><button class="btn quiet" type="button" data-sact="signout">Sign out</button></div>'+
     '<div class="item"><span class="grow"><span style="font-weight:500">App version '+APP_VERSION+'</span><span class="small">Updates install on their own when you reopen the app.</span></span><button class="btn quiet" type="button" data-act="checkupdate">Check now</button></div>';
-  var colA=sec('Notifications','Reminders arrive on this phone even when the app is closed.',n)+sec('Reminder schedule','Shared by everyone on the team. Each phone only gets its own tasks.',r)+'<section class="setsec"><h2>Your reminders</h2><p class="sub" style="margin:0">One-off or repeating nudges, like backups or outreach follow-ups.</p>'+(S.ui.rem?remForm():'')+'<div class="group">'+custom+'</div></section>';
   var links=claudeLinks().map(function(l){return '<div class="item" style="flex-direction:column;align-items:stretch;gap:8px"><div class="row" style="gap:8px"><input class="set-in" style="flex:1;font-weight:600" data-link="'+esc(l.id)+':name" value="'+esc(l.name)+'" placeholder="Name, e.g. Salmon research" aria-label="Link name" maxlength="40">'+(l.url?'<a class="iconbtn" href="'+esc(l.url)+'" target="_blank" rel="noopener" aria-label="Open '+esc(l.name)+'"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></a>':'')+'<button class="iconbtn" type="button" data-act="linkdel" data-id="'+esc(l.id)+'" aria-label="Remove '+esc(l.name)+'"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div><input class="set-in" type="url" inputmode="url" data-link="'+esc(l.id)+':url" value="'+esc(l.url)+'" placeholder="Paste the link: https://claude.ai/…" aria-label="Link for '+esc(l.name)+'"></div>';}).join('')+
     '<button class="item" type="button" data-act="linkadd" style="color:var(--accent-fg);font-weight:600"><svg class="chev" viewBox="0 0 24 24" style="stroke:currentColor"><path d="M12 5v14M5 12h14"/></svg>Add a chat link</button>';
-  colA+=sec('Claude chats','Shortcuts in the chat button at the top of each screen. Episode chats are linked from each episode’s Docs tab. To copy a link, open the chat in Claude and use Share, or copy it from the address bar.',links);
-  var colB=sec('Display','Only on this phone.',disp)+sec('Production','Shared by everyone on the team.',prod)+sec('Data & sync','',data)+sec('Account','',acct);
-  return '<div class="wrap">'+statusBanner()+(wide()?'<div class="cols">'+'<div class="setcol">'+colA+'</div><div class="setcol">'+colB+'</div></div>':'<div class="setcol">'+colA+colB+'</div>')+'</div>';
+  var remSec='<div class="group">'+r+'</div><h3 class="sethd">Your reminders</h3>'+(S.ui.rem?remForm():'')+'<div class="group">'+custom+'</div>';
+  var pp=P(), onCount=['morning','night','weekly'].filter(function(k){return pp[k];}).length;
+  var secs=[
+    {k:'notifications',g:'This phone',t:'Notifications',ic:'M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4',sum:!ps.supported?'Not available here':ps.perm==='denied'?'Blocked':on?'On':'Off',note:'Reminders reach this phone even when the app is closed.',body:'<div class="group">'+n+'</div>'},
+    {k:'display',g:'This phone',t:'Display',ic:'M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.5 1.5M16.5 16.5 18 18M6 18l1.5-1.5M16.5 7.5 18 6M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8',sum:({system:'Auto',light:'Light',dark:'Dark'})[devGet('theme','system')]+' theme',note:'Only changes this phone.',body:'<div class="group">'+disp+'</div>'},
+    {k:'reminders',g:'Team',t:'Reminders',ic:'M12 7v5l3 2M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18',sum:onCount+' scheduled'+(vals(S.reminders).length?' · '+vals(S.reminders).length+' custom':''),note:'Shared by the team. Each phone only gets its own tasks.',body:remSec},
+    {k:'claude',g:'Team',t:'Claude chats',ic:'M4 5h16v11H9l-5 4zM8 9.5h8M8 12.5h5',sum:claudeLinks().filter(function(l){return l.url;}).length+' linked',note:'Shortcuts in the chat button. Copy a chat’s link from Share in Claude.',body:'<div class="group">'+links+'</div>'},
+    {k:'production',g:'Team',t:'Production',ic:'M5 21V4h11l-2 4 2 4H5',sum:'Launch '+fmt((S.settings&&S.settings.launch)||'2027-02-19',false),note:'Shared by the team.',body:'<div class="group">'+prod+'</div>'},
+    {k:'data',g:'Account',t:'Data & sync',ic:'M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5',sum:n0?n0+' waiting':'All saved',note:'',body:'<div class="group">'+data+'</div>'},
+    {k:'account',g:'Account',t:'Account',ic:'M12 12a4 4 0 1 0 0-8a4 4 0 1 0 0 8M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6',sum:'Version '+APP_VERSION,note:'',body:'<div class="group">'+acct+'</div>'}
+  ];
+  var cur=route().sec, curSec=secs.filter(function(x){return x.k===cur;})[0];
+  var w=wide(); if(w&&!curSec)curSec=secs[0];
+  var menu='', lastG='';
+  secs.forEach(function(x){
+    if(x.g!==lastG){menu+=(lastG?'</div>':'')+'<p class="label setg">'+x.g+'</p><div class="group">';lastG=x.g;}
+    menu+='<a class="item setrow" href="#settings-'+x.k+'" aria-current="'+(w&&curSec&&curSec.k===x.k?'page':'false')+'"><span class="seticon"><svg viewBox="0 0 24 24"><path d="'+x.ic+'"/></svg></span><span class="grow"><span style="font-weight:600">'+esc(x.t)+'</span></span><span class="small setsum">'+esc(x.sum)+'</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></a>';
+  });
+  menu+='</div>';
+  var detail=curSec?'<div class="setdetail">'+(w?'<h2>'+esc(curSec.t)+'</h2>':'')+(curSec.note?'<p class="sub" style="margin:0">'+curSec.note+'</p>':'')+curSec.body+'</div>':'';
+  if(w)return '<div class="wrap">'+statusBanner()+'<div class="setsplit"><nav class="setmenu" aria-label="Settings sections">'+menu+'</nav>'+detail+'</div></div>';
+  return '<div class="wrap">'+statusBanner()+(curSec?detail:'<nav class="setmenu" aria-label="Settings sections">'+menu+'</nav>')+'</div>';
 }
 function startScreen(){
   var st=devGet('start','today');
@@ -1391,7 +1421,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='15';
+var APP_VERSION='16';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
