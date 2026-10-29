@@ -304,8 +304,12 @@ button.day{border:0;font:inherit;cursor:pointer;background:transparent}
 .wrap.slide-r{animation:slideR .18s ease-out}
 /* sign-in */
 body.signedout .nav, body.signedout .fab, body.signedout .topbar{display:none}
-.signin{max-width:440px;margin:0 auto;min-height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.signin{max-width:440px;margin:0 auto;min-height:calc(100dvh - 160px);box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:18px}
 .signin form{display:flex;flex-direction:column;gap:10px}
+.sihead{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;margin-bottom:6px}
+.sihead svg{margin-bottom:6px}
+.sidivider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+.sidivider::before,.sidivider::after{content:"";flex:1;height:1px;background:var(--line-strong)}
 .signin input{min-height:48px;border-radius:12px;border:1px solid var(--line-strong);background:var(--field);color:var(--ink);padding:0 14px;font-size:16px}
 .signin input.code{font-family:var(--f-mono);letter-spacing:.3em;font-size:20px;text-align:center}
 .linkbtn{border:0;background:transparent;color:var(--link);padding:0;min-height:44px;cursor:pointer;font-size:15px;text-align:left}
@@ -491,7 +495,7 @@ async function start(){
   sb.auth.onAuthStateChange(function(ev,session){
     var had=!!S.session; S.session=session;
     /* Never call Supabase inside this callback; defer it. */
-    if(session&&!had){S.signin={email:'',sent:false,busy:false,msg:''};setTimeout(connect,0);}
+    if(session&&!had){S.signin={email:'',sent:false,busy:false,msg:'',mode:S.signin.mode};setTimeout(connect,0);}
     if(!session&&ev==='SIGNED_OUT'){S.dbState='signedout';render();}
   });
   var g=await sb.auth.getSession(); var s=g.data&&g.data.session;
@@ -515,6 +519,15 @@ function create(col,data,okMsg){
   queueOp({k:'insert',col:col,id:id,data:data,at:Date.now()});
   if(okMsg)toast(okMsg); return Promise.resolve();
 }
+async function setPassword(p1,p2){
+  if(p1.length<8){toast('Use at least 8 characters.');return;}
+  if(p1!==p2){toast('The two passwords don’t match.');return;}
+  S.ui.pwBusy=true;render();
+  var r=await sb.auth.updateUser({password:p1});
+  S.ui.pwBusy=false;
+  if(r.error){toast(/same/i.test(r.error.message||'')?'That’s already your password.':'Couldn’t save it: '+(r.error.message||'try again')+'.');render();return;}
+  S.ui.pwOpen=false;devSet('signinMode','password');render();toast('Password saved. Use it next time you sign in.');
+}
 async function sendLink(email){
   S.signin.busy=true;S.signin.msg='';render();
   var r=await sb.auth.signInWithOtp({email:email,options:{emailRedirectTo:location.origin+location.pathname,shouldCreateUser:true}});
@@ -529,28 +542,51 @@ async function verifyCode(code){
   S.signin.busy=false;
   if(r.error){S.signin.msg='That code didn’t work. Check it, or send a new one.';render();}
 }
+function siMode(){return S.signin.mode||devGet('signinMode','password');}
+async function signInPassword(email,pw){
+  S.signin.busy=true;S.signin.msg='';S.signin.email=email;render();
+  var r=await sb.auth.signInWithPassword({email:email,password:pw});
+  S.signin.busy=false;
+  if(r.error){S.signin.msg=/invalid/i.test(r.error.message||'')?'That email and password don’t match. If you haven’t set a password yet, sign in with an email link below, then set one in Settings.':(/rate/i.test(r.error.message||'')?'Too many tries. Wait a minute, then try again.':'Couldn’t sign in. Check your connection and try again.');render();return;}
+  devSet('signinMode','password');
+}
 function viewSignIn(){
-  var s=S.signin, mark='<svg width="56" height="51" viewBox="0 0 44 40" aria-hidden="true" style="color:var(--ink)"><path d="M14 12 H2 V38 H42 V12 H30" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6 38 Q22 -26 38 38" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 38 Q22 -10 33 38" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M16 38 Q22 6 28 38" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="22" cy="5" r="3.6" fill="var(--pin)"/></svg>';
+  var s=S.signin, mode=siMode(), mark='<svg width="56" height="51" viewBox="0 0 44 40" aria-hidden="true" style="color:var(--ink)"><path d="M14 12 H2 V38 H42 V12 H30" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6 38 Q22 -26 38 38" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 38 Q22 -10 33 38" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M16 38 Q22 6 28 38" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="22" cy="5" r="3.6" fill="var(--pin)"/></svg>';
   var msg=s.msg?'<div class="notice warn"><span class="dot"></span>'+esc(s.msg)+'</div>':'';
-  var body=!s.sent?
-    '<form data-form="signin"><label class="label" for="si-email">Email</label><input id="si-email" type="email" autocomplete="email" inputmode="email" required placeholder="you@example.com" value="'+esc(s.email)+'"><button class="btn" type="submit"'+(s.busy?' disabled':'')+'>'+(s.busy?'Sending…':'Email me a sign-in link')+'</button></form>':
-    '<div class="card"><span style="font-weight:600">Check your email</span><span class="sub">We sent a sign-in link to <strong>'+esc(s.email)+'</strong>. Open it on this phone. If the email shows a 6-digit code, you can enter it here instead.</span></div>'+
-    '<form data-form="code"><label class="label" for="si-code">Code</label><input id="si-code" class="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="10" placeholder="000000"><button class="btn" type="submit"'+(s.busy?' disabled':'')+'>'+(s.busy?'Checking…':'Sign in')+'</button></form>'+
-    '<div class="row" style="gap:20px"><button class="linkbtn" type="button" data-sact="resend">Send a new link</button><button class="linkbtn" type="button" data-sact="change">Use a different email</button></div>';
-  return '<div class="wrap" style="min-height:100%"><div class="signin">'+mark+'<div><div class="eyebrow">Off The Map · California</div><h1>Production</h1><p class="sub" style="margin:6px 0 0">Sign in with the email address you were added with.</p></div>'+msg+body+'</div></div>';
+  var body;
+  if(mode==='password'){
+    body='<form data-form="pwsignin" class="siform"><label class="label" for="si-email">Email</label><input id="si-email" type="email" autocomplete="username" inputmode="email" required placeholder="you@example.com" value="'+esc(s.email)+'">'+
+      '<label class="label" for="si-pw" style="margin-top:6px">Password</label><input id="si-pw" type="password" autocomplete="current-password" required placeholder="Your password">'+
+      '<button class="btn" type="submit"'+(s.busy?' disabled':'')+'>'+(s.busy?'Signing in…':'Sign in')+'</button></form>'+
+      '<div class="sidivider"><span>or</span></div>'+
+      '<button class="btn quiet" type="button" data-sact="mode-link">Email me a sign-in link</button>'+
+      '<p class="small" style="margin:0;text-align:center">First time here, or forgot your password? Use an email link, then set a password in Settings.</p>';
+  } else if(!s.sent){
+    body='<form data-form="signin" class="siform"><label class="label" for="si-email">Email</label><input id="si-email" type="email" autocomplete="email" inputmode="email" required placeholder="you@example.com" value="'+esc(s.email)+'"><button class="btn" type="submit"'+(s.busy?' disabled':'')+'>'+(s.busy?'Sending…':'Email me a sign-in link')+'</button></form>'+
+      '<button class="linkbtn" type="button" data-sact="mode-password" style="align-self:center">Sign in with a password instead</button>';
+  } else {
+    body='<div class="card"><span style="font-weight:600">Check your email</span><span class="sub">We sent a sign-in link to <strong>'+esc(s.email)+'</strong>. Open it on this phone. If the email shows a 6-digit code, you can enter it here instead.</span></div>'+
+      '<form data-form="code" class="siform"><label class="label" for="si-code">Code</label><input id="si-code" class="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="10" placeholder="000000"><button class="btn" type="submit"'+(s.busy?' disabled':'')+'>'+(s.busy?'Checking…':'Sign in')+'</button></form>'+
+      '<div class="row" style="gap:20px;justify-content:center;flex-wrap:wrap"><button class="linkbtn" type="button" data-sact="resend">Send a new link</button><button class="linkbtn" type="button" data-sact="change">Use a different email</button><button class="linkbtn" type="button" data-sact="mode-password">Use a password</button></div>';
+  }
+  return '<div class="wrap" style="min-height:100%"><div class="signin"><div class="sihead">'+mark+'<div class="eyebrow">Off The Map · California</div><h1>Sign in</h1><p class="sub" style="margin:0">Welcome back. Only team members can sign in.</p></div>'+msg+body+'</div></div>';
 }
 function viewDenied(){
   var em=S.session&&S.session.user?S.session.user.email:'';
   return '<div class="wrap" style="min-height:100%"><div class="signin"><h1>No access yet</h1><p class="sub" style="margin:0">'+esc(em)+' isn’t on this app’s member list. Ask Claude in your project chat to add it, then reload.</p><button class="btn quiet" type="button" data-sact="signout">Sign out</button></div></div>';
 }
 document.addEventListener('submit',function(ev){
-  var f=ev.target.closest('[data-form="signin"],[data-form="code"]'); if(!f)return; ev.preventDefault(); ev.stopImmediatePropagation();
+  var f=ev.target.closest('[data-form="signin"],[data-form="code"],[data-form="pwsignin"],[data-form="setpw"]'); if(!f)return; ev.preventDefault(); ev.stopImmediatePropagation();
+  if(f.getAttribute('data-form')==='pwsignin'){var em0=(document.getElementById('si-email').value||'').trim(),pw0=document.getElementById('si-pw').value||'';if(em0&&pw0)signInPassword(em0,pw0);return;}
+  if(f.getAttribute('data-form')==='setpw'){var p1=document.getElementById('pw-new').value||'',p2=document.getElementById('pw-again').value||'';setPassword(p1,p2);return;}
   if(f.getAttribute('data-form')==='signin'){var em=(document.getElementById('si-email').value||'').trim();if(em)sendLink(em);}
   else {var c=(document.getElementById('si-code').value||'').replace(/\D/g,'');if(c)verifyCode(c);}
 },true);
 document.addEventListener('click',function(ev){
   var b=ev.target.closest('[data-sact]'); if(!b)return; var a=b.getAttribute('data-sact');
   if(a==='resend')sendLink(S.signin.email);
+  if(a==='mode-link'){var e0=document.getElementById('si-email');S.signin={email:e0?e0.value.trim():S.signin.email,sent:false,busy:false,msg:'',mode:'link'};devSet('signinMode','link');render();return;}
+  if(a==='mode-password'){S.signin={email:S.signin.email,sent:false,busy:false,msg:'',mode:'password'};devSet('signinMode','password');render();return;}
   if(a==='retry'&&sb&&S.session){flushWait=3000;flush();connect();}
   if(a==='change'){S.signin={email:S.signin.email,sent:false,busy:false,msg:''};render();}
   if(a==='signout'&&sb){sb.auth.signOut().then(function(){try{localStorage.removeItem(CACHE_KEY);localStorage.removeItem(OUT_KEY);}catch(e){}S.outbox=[];COLS.forEach(function(k){S[k]={};});S.settings=null;S.session=null;S.dbState='signedout';if(chan){sb.removeChannel(chan);chan=null;}render();});}
@@ -1061,7 +1097,9 @@ function viewSettings(){
   var n0=S.outbox.length;
   var data='<div class="item"><span class="grow"><span style="font-weight:500">'+(n0?n0+' change'+(n0>1?'s':'')+' waiting to save':'All changes saved')+'</span><span class="small">'+(S.loadedAt?'Last refreshed '+esc(new Date(S.loadedAt).toTimeString().slice(0,5)):'Not refreshed yet')+'</span></span><button class="btn quiet" type="button" data-sact="retry">Refresh now</button></div>'+
     '<div class="item"><span class="grow"><span style="font-weight:500">Reset this phone’s copy</span><span class="small">Clears the saved copy and reloads everything. Your plan in the cloud isn’t touched.'+(n0?' Unsaved changes on this phone would be lost.':'')+'</span></span><button class="btn quiet" type="button" data-act="resetcache">'+(S.ui.resetArm?'Tap again':'Reset')+'</button></div>';
-  var acct='<div class="item"><span class="grow"><span style="font-weight:500">Signed in</span><span class="small">'+esc(S.session&&S.session.user?S.session.user.email:'')+'</span></span><button class="btn quiet" type="button" data-sact="signout">Sign out</button></div>'+
+  var pwRow=S.ui.pwOpen?'<form class="item" data-form="setpw" style="flex-direction:column;align-items:stretch;gap:8px"><span style="font-weight:500">Set a password</span><input id="pw-new" class="set-in" type="password" autocomplete="new-password" minlength="8" placeholder="New password (8+ characters)"><input id="pw-again" class="set-in" type="password" autocomplete="new-password" placeholder="Type it again"><div class="row" style="gap:8px;justify-content:flex-end"><button class="btn quiet" type="button" data-act="pwcancel">Cancel</button><button class="btn" type="submit"'+(S.ui.pwBusy?' disabled':'')+'>'+(S.ui.pwBusy?'Saving…':'Save password')+'</button></div></form>':
+    '<div class="item"><span class="grow"><span style="font-weight:500">Password</span><span class="small">Sign in with your email and a password instead of an email link.</span></span><button class="btn quiet" type="button" data-act="pwopen">Set password</button></div>';
+  var acct=pwRow+'<div class="item"><span class="grow"><span style="font-weight:500">Signed in</span><span class="small">'+esc(S.session&&S.session.user?S.session.user.email:'')+'</span></span><button class="btn quiet" type="button" data-sact="signout">Sign out</button></div>'+
     '<div class="item"><span class="grow"><span style="font-weight:500">App version '+APP_VERSION+'</span><span class="small">Updates install on their own when you reopen the app.</span></span><button class="btn quiet" type="button" data-act="checkupdate">Check now</button></div>';
   var colA=sec('Notifications','Reminders arrive on this phone even when the app is closed.',n)+sec('Reminder schedule','Shared by everyone on the team. Each phone only gets its own tasks.',r)+'<section class="setsec"><h2>Your reminders</h2><p class="sub" style="margin:0">One-off or repeating nudges, like backups or outreach follow-ups.</p>'+(S.ui.rem?remForm():'')+'<div class="group">'+custom+'</div></section>';
   var links=claudeLinks().map(function(l){return '<div class="item" style="flex-direction:column;align-items:stretch;gap:8px"><div class="row" style="gap:8px"><input class="set-in" style="flex:1;font-weight:600" data-link="'+esc(l.id)+':name" value="'+esc(l.name)+'" placeholder="Name, e.g. Salmon research" aria-label="Link name" maxlength="40">'+(l.url?'<a class="iconbtn" href="'+esc(l.url)+'" target="_blank" rel="noopener" aria-label="Open '+esc(l.name)+'"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></a>':'')+'<button class="iconbtn" type="button" data-act="linkdel" data-id="'+esc(l.id)+'" aria-label="Remove '+esc(l.name)+'"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div><input class="set-in" type="url" inputmode="url" data-link="'+esc(l.id)+':url" value="'+esc(l.url)+'" placeholder="Paste the link: https://claude.ai/…" aria-label="Link for '+esc(l.name)+'"></div>';}).join('')+
@@ -1262,6 +1300,8 @@ document.addEventListener('click',function(ev){
   if(act==='qmove'){var ql=queued(),ix=-1;ql.forEach(function(x,n){if(x.id===id)ix=n;});var j=ix+(+k);if(ix<0||j<0||j>=ql.length)return;var tmp=ql[ix];ql[ix]=ql[j];ql[j]=tmp;ql.forEach(function(x,n){if(x.queue!==n+1){x.queue=n+1;write('ideas/'+x.id,{queue:n+1});}});render();return;}
   if(act==='who'){setWho(k);render();return;}
   if(act==='claude'){S.ui.claude=true;render();return;}
+  if(act==='pwopen'){S.ui.pwOpen=true;render();setTimeout(function(){var t=document.getElementById('pw-new');if(t)t.focus();},30);return;}
+  if(act==='pwcancel'){S.ui.pwOpen=false;render();return;}
   if(act==='settings'){if(route().v==='settings'){location.hash=S.ui.beforeSettings||'#today';}else{S.ui.beforeSettings=location.hash||'#today';location.hash='#settings';}return;}
   if(act==='closeclaude'){if(b.classList.contains('scrim')&&ev.target!==b)return;S.ui.claude=false;if(b.tagName!=='A')ev.preventDefault();render();return;}
   if(act==='chatedit'){S.ui.chatEdit=id;render();setTimeout(function(){var t=document.getElementById('chat-in');if(t)t.focus();},30);return;}
@@ -1345,7 +1385,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='13';
+var APP_VERSION='14';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
