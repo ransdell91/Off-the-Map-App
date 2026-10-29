@@ -682,12 +682,14 @@ function viewToday(){
   else if(role)focus='<div class="card"><span class="label">'+esc(HALF[role.half].name)+' this week</span><span>No episode is in the '+esc(HALF[role.half].name.toLowerCase())+' half yet. Use this day for the lead-time and ramp-up tasks below.</span></div>';
   var whoChips='<div class="chips" role="group" aria-label="Show tasks for">'+[{id:'all',name:'Everyone'}].concat(team()).map(function(p){return '<button class="chip" type="button" data-act="who" data-k="'+esc(p.id)+'" aria-pressed="'+(S.ui.who===p.id)+'" data-tip="'+(p.id==='all'?'Show everyone’s tasks':'Show only '+esc(p.name)+'’s tasks and shared ones')+'">'+esc(p.name)+'</button>';}).join('')+'</div>';
   var heading=isReal?'Today’s tasks':'Tasks for '+fmt(d,false);
-  var left='<div class="weekscroll" role="group" aria-label="Weeks" data-tip="Scroll sideways for earlier or later weeks. Tap a day to open it.">'+days+'</div>'+focus+whoChips+
+  var weekStrip='<div class="weekscroll" role="group" aria-label="Weeks" data-tip="Scroll sideways for earlier or later weeks. Tap a day to open it.">'+days+'</div>';
+  var left=focus+whoChips+
     '<section aria-labelledby="tt" style="display:flex;flex-direction:column;gap:10px"><div class="row" style="justify-content:space-between;align-items:baseline"><h2 id="tt">'+((role||todays.length)?esc(heading):'Nothing scheduled')+'</h2>'+(todays.length?'<span class="small">'+todays.filter(function(t){return t.done;}).length+' of '+todays.length+' done · '+hrs(mins)+' left of '+hrs(totalM)+'</span>':'')+'</div>'+
     (todays.length?'<div class="group">'+todays.map(function(t){return taskRow(t);}).join('')+'</div>':(role?'<div class="empty">No tasks for this day. Add one with the + button.</div>':''))+
     (carried.length?'<p class="label" style="margin-top:6px">Carried over</p><div class="group">'+carried.map(function(t){return taskRow(t,true);}).join('')+'</div>':'')+'</section>';
   var up=nd?'<section aria-labelledby="un" style="display:flex;flex-direction:column;gap:10px"><h2 id="un">Up next</h2><button class="card" type="button" data-act="setday" data-k="'+nd+'" style="flex-direction:row;align-items:center;gap:14px;text-align:left;cursor:pointer;width:100%;font:inherit;color:inherit" data-tip="Open '+esc(fmt(nd))+' in the day view"><span class="daychip" style="flex-direction:column;background:var(--sky);color:var(--ink);line-height:1.1"><span>'+DOW[pd(nd).getDay()].toUpperCase()+'</span><span style="font-size:16px;font-weight:700">'+pd(nd).getDate()+'</span></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-weight:600">'+(nextTrip?'Shoot: '+esc(nextTrip.name):esc(nextRole.name))+'</span><span class="small">'+(nextEp?esc(shortName(nextEp)):'No episode in this half yet')+(upcoming.length?' · '+upcoming.length+' tasks':'')+'</span></span>'+svg(CHEV)+'</button></section>':'';
-  return '<div class="wrap"><div class="dayhead">'+dayNav(d)+'<div><h2 class="big">'+esc(title)+'</h2><div class="sub" style="margin-top:4px">'+esc(subl)+'</div></div></div>'+ticker(d)+todaySeg('day')+statusBanner()+'<div class="cols"><div>'+left+'</div><div>'+onLine(d)+up+'</div></div></div>';
+  var backToday=isReal?'':'<button class="btn quiet sm" type="button" data-act="setday" data-k="'+today()+'" data-tip="Jump back to today">Today</button>';
+  return '<div class="wrap">'+weekStrip+'<div class="dayhead"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div style="min-width:0"><div class="eyebrow">'+esc(isReal?'Today · '+fmt(d):fmt(d))+'</div><h2 class="big" style="margin-top:4px">'+esc(title)+'</h2></div>'+backToday+'</div><div class="sub">'+esc(subl)+'</div></div>'+todaySeg('day')+ticker(d)+statusBanner()+'<div class="cols"><div>'+left+'</div><div>'+onLine(d)+up+'</div></div></div>';
 }
 
 function onLine(d){
@@ -726,7 +728,7 @@ function viewCalendar(){
   var title=MON[first.getMonth()]+' '+first.getFullYear();
   var legend='<div class="legend"><span><i class="lg-prod"></i>Production day</span><span><i class="k-start"></i>Episode starts</span><span><i class="k-shoot"></i>Shoot</span><span><i class="k-bank"></i>Banked</span><span><i class="k-release"></i>Release</span><span><b class="cnt" style="position:static">3h</b> Planned task time</span></div>';
   return '<div class="wrap"><div class="dayhead"><div class="row" style="justify-content:space-between;gap:4px"><div class="daynav"><button class="iconbtn" type="button" data-act="calmonth" data-k="-1" aria-label="Previous month" data-tip="Previous month. You can also swipe right.">'+svg('M15 5l-7 7 7 7','')+'</button><h2 class="big" style="min-width:150px;text-align:center">'+esc(title)+'</h2><button class="iconbtn" type="button" data-act="calmonth" data-k="1" aria-label="Next month" data-tip="Next month. You can also swipe left.">'+svg('M9 5l7 7-7 7','')+'</button></div><span class="row" style="gap:4px">'+(m.slice(0,7)!==real.slice(0,7)?'<button class="btn quiet sm" type="button" data-act="calmonth" data-k="0" data-tip="Jump back to this month">This month</button>':'')+'</span></div></div>'+
-    ticker(real)+todaySeg('cal')+statusBanner()+
+    todaySeg('cal')+ticker(real)+statusBanner()+
     '<div class="cols cal-cols"><div><div class="cal" role="group" aria-label="'+esc(title)+'">'+head+cells+'</div>'+legend+'</div><div><section style="display:flex;flex-direction:column;gap:8px"><h2>This month</h2>'+agendaHtml+'</section></div></div></div>';
 }
 
@@ -908,7 +910,7 @@ function viewPrompts(){
 var GEAR_SVG='<svg viewBox="0 0 24 24"><path d="M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
 function topbarHtml(r){
   var t='', eb='', back=null, launch=(S.settings&&S.settings.launch)||'2027-02-19';
-  if(r.v==='today'){t='Today';var td=pd(today());eb=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][td.getDay()]+', '+MON[td.getMonth()]+' '+td.getDate();}
+  if(r.v==='today'){t='Today';eb='Off The Map · California';}
   else if(r.v==='calendar'){t='Calendar';eb='Shoots, banks and releases';}
   else if(r.v==='runway'){t='Runway';eb=target()+' banked before launch';}
   else if(r.v==='episodes'){t='Episodes';eb=eps().length+' in the plan · '+bankedCount()+' banked';}
@@ -1421,7 +1423,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='16';
+var APP_VERSION='17';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
