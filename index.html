@@ -306,6 +306,9 @@ button.day{border:0;font:inherit;cursor:pointer;background:transparent}
 body.signedout .nav, body.signedout .fab, body.signedout .topbar{display:none}
 .signin{max-width:440px;margin:0 auto;min-height:calc(100dvh - 160px);box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:18px}
 .signin form{display:flex;flex-direction:column;gap:10px}
+.pwwrap{display:flex;align-items:center;gap:6px}
+.pwwrap .set-in{flex:1;min-height:46px;font-size:16px}
+.iconbtn[data-act="pwshow"][aria-pressed="true"]{background:var(--sand)}
 .sihead{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;margin-bottom:6px}
 .sihead svg{margin-bottom:6px}
 .sidivider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
@@ -556,7 +559,7 @@ function viewSignIn(){
   var body;
   if(mode==='password'){
     body='<form data-form="pwsignin" class="siform"><label class="label" for="si-email">Email</label><input id="si-email" type="email" autocomplete="username" inputmode="email" required placeholder="you@example.com" value="'+esc(s.email)+'">'+
-      '<label class="label" for="si-pw" style="margin-top:6px">Password</label><input id="si-pw" type="password" autocomplete="current-password" required placeholder="Your password">'+
+      '<label class="label" for="si-pw" style="margin-top:6px">Password</label><div class="pwwrap"><input id="si-pw" type="password" autocomplete="current-password" required placeholder="Your password" style="flex:1"><button class="iconbtn" type="button" data-sact="sishow" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>'+
       '<button class="btn" type="submit"'+(s.busy?' disabled':'')+'>'+(s.busy?'Signing in…':'Sign in')+'</button></form>'+
       '<div class="sidivider"><span>or</span></div>'+
       '<button class="btn quiet" type="button" data-sact="mode-link">Email me a sign-in link</button>'+
@@ -578,7 +581,7 @@ function viewDenied(){
 document.addEventListener('submit',function(ev){
   var f=ev.target.closest('[data-form="signin"],[data-form="code"],[data-form="pwsignin"],[data-form="setpw"]'); if(!f)return; ev.preventDefault(); ev.stopImmediatePropagation();
   if(f.getAttribute('data-form')==='pwsignin'){var em0=(document.getElementById('si-email').value||'').trim(),pw0=document.getElementById('si-pw').value||'';if(em0&&pw0)signInPassword(em0,pw0);return;}
-  if(f.getAttribute('data-form')==='setpw'){var p1=document.getElementById('pw-new').value||'',p2=document.getElementById('pw-again').value||'';setPassword(p1,p2);return;}
+  if(f.getAttribute('data-form')==='setpw'){var p1=document.getElementById('pw-new').value||'';setPassword(p1,p1);return;}
   if(f.getAttribute('data-form')==='signin'){var em=(document.getElementById('si-email').value||'').trim();if(em)sendLink(em);}
   else {var c=(document.getElementById('si-code').value||'').replace(/\D/g,'');if(c)verifyCode(c);}
 },true);
@@ -586,6 +589,7 @@ document.addEventListener('click',function(ev){
   var b=ev.target.closest('[data-sact]'); if(!b)return; var a=b.getAttribute('data-sact');
   if(a==='resend')sendLink(S.signin.email);
   if(a==='mode-link'){var e0=document.getElementById('si-email');S.signin={email:e0?e0.value.trim():S.signin.email,sent:false,busy:false,msg:'',mode:'link'};devSet('signinMode','link');render();return;}
+  if(a==='sishow'){var spi=document.getElementById('si-pw');if(spi){var sh=spi.type==='password';spi.type=sh?'text':'password';b.setAttribute('aria-pressed',String(sh));spi.focus();}return;}
   if(a==='mode-password'){S.signin={email:S.signin.email,sent:false,busy:false,msg:'',mode:'password'};devSet('signinMode','password');render();return;}
   if(a==='retry'&&sb&&S.session){flushWait=3000;flush();connect();}
   if(a==='change'){S.signin={email:S.signin.email,sent:false,busy:false,msg:''};render();}
@@ -1097,7 +1101,7 @@ function viewSettings(){
   var n0=S.outbox.length;
   var data='<div class="item"><span class="grow"><span style="font-weight:500">'+(n0?n0+' change'+(n0>1?'s':'')+' waiting to save':'All changes saved')+'</span><span class="small">'+(S.loadedAt?'Last refreshed '+esc(new Date(S.loadedAt).toTimeString().slice(0,5)):'Not refreshed yet')+'</span></span><button class="btn quiet" type="button" data-sact="retry">Refresh now</button></div>'+
     '<div class="item"><span class="grow"><span style="font-weight:500">Reset this phone’s copy</span><span class="small">Clears the saved copy and reloads everything. Your plan in the cloud isn’t touched.'+(n0?' Unsaved changes on this phone would be lost.':'')+'</span></span><button class="btn quiet" type="button" data-act="resetcache">'+(S.ui.resetArm?'Tap again':'Reset')+'</button></div>';
-  var pwRow=S.ui.pwOpen?'<form class="item" data-form="setpw" style="flex-direction:column;align-items:stretch;gap:8px"><span style="font-weight:500">Set a password</span><input id="pw-new" class="set-in" type="password" autocomplete="new-password" minlength="8" placeholder="New password (8+ characters)"><input id="pw-again" class="set-in" type="password" autocomplete="new-password" placeholder="Type it again"><div class="row" style="gap:8px;justify-content:flex-end"><button class="btn quiet" type="button" data-act="pwcancel">Cancel</button><button class="btn" type="submit"'+(S.ui.pwBusy?' disabled':'')+'>'+(S.ui.pwBusy?'Saving…':'Save password')+'</button></div></form>':
+  var pwRow=S.ui.pwOpen?'<form class="item" data-form="setpw" style="flex-direction:column;align-items:stretch;gap:8px"><span style="font-weight:500">Set a password</span><span class="small">At least 8 characters. You can paste one from your password manager.</span><div class="pwwrap"><input id="pw-new" class="set-in" type="password" autocomplete="new-password" placeholder="New password"><button class="iconbtn" type="button" data-act="pwshow" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div class="row" style="gap:8px;justify-content:flex-end"><button class="btn quiet" type="button" data-act="pwcancel">Cancel</button><button class="btn" type="submit"'+(S.ui.pwBusy?' disabled':'')+'>'+(S.ui.pwBusy?'Saving…':'Save password')+'</button></div></form>':
     '<div class="item"><span class="grow"><span style="font-weight:500">Password</span><span class="small">Sign in with your email and a password instead of an email link.</span></span><button class="btn quiet" type="button" data-act="pwopen">Set password</button></div>';
   var acct=pwRow+'<div class="item"><span class="grow"><span style="font-weight:500">Signed in</span><span class="small">'+esc(S.session&&S.session.user?S.session.user.email:'')+'</span></span><button class="btn quiet" type="button" data-sact="signout">Sign out</button></div>'+
     '<div class="item"><span class="grow"><span style="font-weight:500">App version '+APP_VERSION+'</span><span class="small">Updates install on their own when you reopen the app.</span></span><button class="btn quiet" type="button" data-act="checkupdate">Check now</button></div>';
@@ -1157,14 +1161,15 @@ function render(){
 
 /* descriptions on hover, long-press and keyboard focus */
 function applyTips(root){
-  root.querySelectorAll('button,a,select,input,textarea,[role="switch"]').forEach(function(el){
+  root.querySelectorAll('button,a,[role="switch"]').forEach(function(el){
     if(el.hasAttribute('data-tip'))return;
     var t=el.getAttribute('aria-label')||el.getAttribute('placeholder')||(el.textContent||'').trim().replace(/\s+/g,' ');
     if(t)el.setAttribute('data-tip',t.length>90?t.slice(0,88)+'…':t);
   });
 }
 var tipEl=document.getElementById('tip'), hoverT=null, lpT=null, lpFired=false, sx=0, sy=0;
-function tipTarget(n){return n&&n.closest?n.closest('[data-tip]'):null;}
+function isField(n){return !!(n&&n.closest&&n.closest('input,textarea,select,[contenteditable]'));}
+function tipTarget(n){if(isField(n))return null;return n&&n.closest?n.closest('[data-tip]'):null;}
 function showTip(el){
   var t=el.getAttribute('data-tip'); if(!t||!document.body.contains(el))return;
   tipEl.textContent=t; tipEl.hidden=false;
@@ -1302,6 +1307,7 @@ document.addEventListener('click',function(ev){
   if(act==='claude'){S.ui.claude=true;render();return;}
   if(act==='pwopen'){S.ui.pwOpen=true;render();setTimeout(function(){var t=document.getElementById('pw-new');if(t)t.focus();},30);return;}
   if(act==='pwcancel'){S.ui.pwOpen=false;render();return;}
+  if(act==='pwshow'){var pin=document.getElementById('pw-new');if(!pin)return;var show=pin.type==='password';pin.type=show?'text':'password';b.setAttribute('aria-pressed',String(show));b.setAttribute('aria-label',show?'Hide password':'Show password');pin.focus();return;}
   if(act==='settings'){if(route().v==='settings'){location.hash=S.ui.beforeSettings||'#today';}else{S.ui.beforeSettings=location.hash||'#today';location.hash='#settings';}return;}
   if(act==='closeclaude'){if(b.classList.contains('scrim')&&ev.target!==b)return;S.ui.claude=false;if(b.tagName!=='A')ev.preventDefault();render();return;}
   if(act==='chatedit'){S.ui.chatEdit=id;render();setTimeout(function(){var t=document.getElementById('chat-in');if(t)t.focus();},30);return;}
@@ -1385,7 +1391,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='14';
+var APP_VERSION='15';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
