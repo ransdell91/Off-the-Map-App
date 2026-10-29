@@ -1,12 +1,12 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#EDE3C8" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#1C1915" media="(prefers-color-scheme: dark)"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off The Map"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#D9E4D2" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#141D17" media="(prefers-color-scheme: dark)"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off The Map"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <title>Off The Map Production</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: phone-first app. Under 600px a bottom tab bar and one column; wider (unfolded Fold) a side rail and two panes. */
 :root{
-  --bg:#EDE3C8; --surface:#FFFDF7; --surface2:#F8F3E6; --ink:#2A241C; --on-ink:#EDE3C8;
-  --muted:#62574A; --muted2:#4A4033; --sand:#E2D8BC; --khaki:#C9BC98; --sky:#A9BFCF;
+  --bg:#D9E4D2; --surface:#FBFCF8; --surface2:#EDF2E8; --ink:#2A241C; --on-ink:#EDF2E8;
+  --muted:#62574A; --muted2:#4A4033; --sand:#C9D6BF; --khaki:#A9BC9E; --sky:#A9BFCF;
   --deep:#24352A; --deep-fg:#EDE3C8; --deep-muted:#C9BC98;
   --accent:#3E5C46; --accent-fg:#3E5C46; --on-accent:#FFFFFF;
   --blue:#2C5878; --link:#2C5878; --on-blue:#FFFFFF; --blue-soft:#D6E2EC;
@@ -18,8 +18,8 @@
   --f-mono:'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#1C1915; --surface:#28231C; --surface2:#221E18; --ink:#EDE3C8; --on-ink:#1C1915;
-  --muted:#B3A68A; --muted2:#CFC3A6; --sand:#3A3327; --khaki:#5C5442; --sky:#3D5870;
+  --bg:#141D17; --surface:#1F2B23; --surface2:#19231C; --ink:#EDE3C8; --on-ink:#141D17;
+  --muted:#B3A68A; --muted2:#CFC3A6; --sand:#2B3A2F; --khaki:#4A5C4D; --sky:#3D5870;
   --deep:#2E4536; --deep-fg:#EDE3C8; --deep-muted:#C9BC98;
   --accent:#4E7A5B; --accent-fg:#93C4A0; --on-accent:#FFFFFF;
   --blue:#36678C; --link:#93BDE0; --on-blue:#FFFFFF; --blue-soft:#D6E2EC;
@@ -29,8 +29,8 @@
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#1C1915; --surface:#28231C; --surface2:#221E18; --ink:#EDE3C8; --on-ink:#1C1915;
-  --muted:#B3A68A; --muted2:#CFC3A6; --sand:#3A3327; --khaki:#5C5442; --sky:#3D5870;
+  --bg:#141D17; --surface:#1F2B23; --surface2:#19231C; --ink:#EDE3C8; --on-ink:#141D17;
+  --muted:#B3A68A; --muted2:#CFC3A6; --sand:#2B3A2F; --khaki:#4A5C4D; --sky:#3D5870;
   --deep:#2E4536; --deep-fg:#EDE3C8; --deep-muted:#C9BC98;
   --accent:#4E7A5B; --accent-fg:#93C4A0; --on-accent:#FFFFFF;
   --blue:#36678C; --link:#93BDE0; --on-blue:#FFFFFF; --blue-soft:#D6E2EC;
