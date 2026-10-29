@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light dark"><meta name="theme-color" content="#D9E4D2" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#141D17" media="(prefers-color-scheme: dark)"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off The Map"><link rel="manifest" href="manifest.webmanifest"><script>try{var otmT=localStorage.getItem("otm-theme");if(otmT==="light"||otmT==="dark"){document.documentElement.setAttribute("data-theme",otmT);var otmM=document.querySelector('meta[name="color-scheme"]');if(otmM)otmM.setAttribute("content",otmT);}}catch(e){}</script><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><style>:root{color-scheme:light dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="only light"><meta name="theme-color" content="#D9E4D2" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#141D17" media="(prefers-color-scheme: dark)"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off The Map"><link rel="manifest" href="manifest.webmanifest"><script>try{var otmT=localStorage.getItem("otm-theme");if(otmT==="light"||otmT==="dark"){document.documentElement.setAttribute("data-theme",otmT);var otmM=document.querySelector('meta[name="color-scheme"]');if(otmM)otmM.setAttribute("content",otmT==="dark"?"dark":"only light");}else if(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches){var otmN=document.querySelector('meta[name="color-scheme"]');if(otmN)otmN.setAttribute("content","dark");}}catch(e){}</script><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><style>:root{color-scheme:only light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <title>Off The Map Production</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -16,9 +16,9 @@
   --f-display:'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif;
   --f-body:'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f-mono:'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
-  color-scheme:light;
+  color-scheme:only light;
 }
-:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="light"]{color-scheme:only light}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#141D17; --surface:#1F2B23; --surface2:#19231C; --ink:#EDE3C8; --on-ink:#141D17;
   --muted:#B3A68A; --muted2:#CFC3A6; --sand:#2B3A2F; --khaki:#4A5C4D; --sky:#3D5870;
@@ -907,10 +907,16 @@ var WEEK=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 function devGet(k,d){try{var v=localStorage.getItem('otm-'+k);return v==null?d:v;}catch(e){return d;}}
 function devSet(k,v){try{localStorage.setItem('otm-'+k,v);}catch(e){}}
 var THEME_META=null;
+/* Tell the browser which theme is showing. "only light" stops Samsung Internet from auto-darkening the light theme. */
+function syncScheme(){
+  var t=devGet('theme','system'), dark=t==='dark'||(t!=='light'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+  var m=document.querySelector('meta[name="color-scheme"]'); if(m)m.setAttribute('content',dark?'dark':'only light');
+}
+try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){syncScheme();});}catch(e){}
 function applyTheme(){
   var t=devGet('theme','system'), r=document.documentElement;
   if(t==='light'||t==='dark')r.setAttribute('data-theme',t);else r.removeAttribute('data-theme');
-  var csm=document.querySelector('meta[name="color-scheme"]'); if(csm)csm.setAttribute('content',t==='light'||t==='dark'?t:'light dark');
+  syncScheme();
   var ms=document.querySelectorAll('meta[name="theme-color"]');
   if(!THEME_META)THEME_META=[].map.call(ms,function(m){return m.getAttribute('content');});
   [].forEach.call(ms,function(m,i){m.setAttribute('content',t==='light'?'#D9E4D2':t==='dark'?'#141D17':THEME_META[i]);});
@@ -1339,7 +1345,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='12';
+var APP_VERSION='13';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
