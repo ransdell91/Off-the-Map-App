@@ -179,7 +179,19 @@ button.item,a.item{cursor:pointer}
 .thumb{flex:none;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
 .th-greenlit{background:var(--khaki);color:var(--ink)} .th-research{background:var(--sand);color:var(--ink)} .th-script{background:var(--sky);color:var(--ink)} .th-prepro{background:var(--blue);color:#FFFFFF} .th-edit{background:var(--accent);color:#FFFFFF} .th-banked,.th-published{background:var(--deep);color:var(--deep-fg)}
 .panes{display:flex;flex-direction:column;gap:18px}
-@media (min-width:600px){.panes.split{display:grid;grid-template-columns:340px minmax(0,1fr);gap:24px;align-items:start}}
+.epbody{container-type:inline-size;display:flex;flex-direction:column;gap:16px;min-width:0}
+.epcols{display:flex;flex-direction:column;gap:18px}
+.epcols > *{min-width:0;display:contents}
+.epcols > * > *{order:2;min-width:0}
+.epcols > :first-child > :first-child{order:0}
+.epcols > .side > section.dark{order:1}
+.epcols.nonov > .side{display:none}
+@container (min-width:640px){
+  .epcols{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:start}
+  .epcols > *{display:flex;flex-direction:column;gap:18px}
+  .epcols.nonov > .side{display:flex}
+}
+@media (min-width:600px){.panes.split{display:grid;grid-template-columns:minmax(280px,320px) minmax(0,1fr);gap:24px;align-items:start}}
 .item[aria-current="true"]{background:var(--info-bg)}
 .steps{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;list-style:none;margin:0;padding:0}
 .steps li{height:6px;border-radius:3px;background:var(--line-strong)}
@@ -720,8 +732,7 @@ function episodeBody(e,inPane){
   var head=(inPane?'':'<a class="back" href="#episodes" data-tip="Back to all episodes"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Episodes</a>')+
     '<header style="display:flex;flex-direction:column;gap:6px"><div class="eyebrow">'+esc(series(e.series).name)+' · '+esc(tripName(e.trip))+'</div><h1 style="font-size:'+(inPane?'28px':'30px')+';line-height:1.12">'+esc(e.title)+'</h1><p class="sub" style="margin:0">'+esc(e.logline||e.hook)+'</p></header>'+
     '<ol class="steps" aria-label="Stage: '+STAGE_NAME[p]+'">'+steps+'</ol><div class="small" style="margin-top:-8px"><strong style="color:var(--link)">'+STAGE_NAME[p]+'</strong> · episode '+String(e.prod).padStart(2,'0')+' of '+eps().length+'</div>'+tabChips(e.chat?'<a class="chip go" href="'+esc(e.chat)+'" target="_blank" rel="noopener" data-tip="Open this episode’s chat in Claude">Claude chat ↗</a>':'');
-  if(inPane||wide())return head+'<div class="cols"><div>'+main+'</div><div>'+gateBlock(e,'episodes')+(tab!=='docs'?docsBlock(e):'')+'</div></div>';
-  return head+main+(tab==='overview'?gateBlock(e,'episodes')+docsBlock(e):'');
+  return '<div class="epbody">'+head+'<div class="epcols'+(tab==='overview'?'':' nonov')+'"><div>'+main+'</div><div class="side">'+gateBlock(e,'episodes')+(tab!=='docs'?docsBlock(e):'')+'</div></div></div>';
 }
 function viewEpisode(id){
   var e=S.episodes[id];
@@ -751,8 +762,7 @@ function ideaBody(i){
   var head='<a class="back" href="'+(pos?'#queue':'#ideas')+'" data-tip="'+(pos?'Back to the queue':'Back to all ideas')+'"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>'+(pos?'Queue':'Ideas')+'</a>'+
     '<header style="display:flex;flex-direction:column;gap:6px"><div class="eyebrow">'+esc(series(i.series).name)+(i.region?' · '+esc(i.region):'')+'</div><h1 style="font-size:30px;line-height:1.12">'+esc(i.title)+'</h1><p class="sub" style="margin:0">'+esc(i.hook)+'</p></header>'+
     '<div class="small"><strong style="color:var(--link)">'+esc(status)+'</strong></div>'+tabChips(menuBtn);
-  if(wide())return head+'<div class="cols"><div>'+main+'</div><div>'+gateBlock(i,'ideas')+(tab!=='docs'?docsBlock(i):'')+'</div></div>';
-  return head+main+(tab==='overview'?gateBlock(i,'ideas')+docsBlock(i):'');
+  return '<div class="epbody">'+head+'<div class="epcols'+(tab==='overview'?'':' nonov')+'"><div>'+main+'</div><div class="side">'+gateBlock(i,'ideas')+(tab!=='docs'?docsBlock(i):'')+'</div></div></div>';
 }
 function viewIdea(id){
   var i=S.ideas[id];
@@ -1280,7 +1290,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='8';
+var APP_VERSION='9';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
