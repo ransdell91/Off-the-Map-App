@@ -1,7 +1,7 @@
 // Off The Map: offline support.
 // The app shell is cached so the app opens without a connection.
 // Your data is never cached here; the app keeps its own copy of your last-loaded plan.
-const VERSION = 'otm-v19';
+const VERSION = 'otm-v20';
 const SHELL = [
   './',
   './index.html',
@@ -91,5 +91,17 @@ self.addEventListener('notificationclick', (event) => {
       }
     }
     await self.clients.openWindow(target);
+  })());
+});
+
+// If the browser replaces this phone's push registration, tell any open app window to save the new one.
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil((async () => {
+    try {
+      const opts = event.oldSubscription && event.oldSubscription.options;
+      if (opts && opts.applicationServerKey) await self.registration.pushManager.subscribe(opts);
+    } catch (e) {}
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    all.forEach((c) => c.postMessage({ type: 'subchange' }));
   })());
 });

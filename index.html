@@ -248,6 +248,10 @@ button.item,a.item{cursor:pointer}
 .setrow[aria-current="page"]{background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
 .seticon{flex:none;width:34px;height:34px;border-radius:10px;background:var(--deep);color:var(--deep-fg);display:flex;align-items:center;justify-content:center}
 .seticon svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chkrow{gap:12px}
+.chk{flex:none;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#FFFFFF}
+.chk.ok{background:var(--accent)}
+.chk.no{background:var(--pin)}
 .setsum{flex:none;max-width:45%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
 .setdetail{display:flex;flex-direction:column;gap:12px;min-width:0}
 .setdetail h2{margin:0}
@@ -993,22 +997,29 @@ S.push={supported:('serviceWorker' in navigator)&&('PushManager' in window)&&('N
 function b64u(s){var p='='.repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,'+').replace(/_/g,'/')),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
 function deviceName(){var u=navigator.userAgent||'';if(/SM-F9\d\d/i.test(u))return 'Galaxy Z Fold';if(/Android/i.test(u))return 'Android phone';if(/iPhone|iPad/i.test(u))return 'iPhone';if(/Windows/i.test(u))return 'Windows computer';if(/Mac/i.test(u))return 'Mac';return 'This device';}
 function swReady(){return timed(navigator.serviceWorker.ready,8000);}
+/* Keep this phone registered. If the server has no record of it (Google expired it), make a fresh registration. */
+async function freshSub(reg){
+  var old=await reg.pushManager.getSubscription(); if(old){try{await old.unsubscribe();}catch(e){}}
+  return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUB)});
+}
 async function pushRefresh(){
   if(!S.push.supported)return;
   try{
     S.push.perm=Notification.permission;
-    var reg=await swReady(), s=await reg.pushManager.getSubscription(); S.push.sub=s;
-    if(s&&sb&&S.session){
-      var r=await sb.from('push_subs').select('id,role,device,last_ok').eq('endpoint',s.endpoint).maybeSingle();
-      S.push.row=r.data||null;
-      if(!r.error&&!r.data&&S.push.perm==='granted')await saveSub(s,devGet('pushRole',defaultRole()));
-    }
-  }catch(e){}
+    var reg=await swReady(), s0=await reg.pushManager.getSubscription(); S.push.sub=s0;
+    if(sb&&S.session&&S.push.perm==='granted'&&devGet('pushOff','')!=='1'){
+      var row=null;
+      if(s0){var r=await sb.from('push_subs').select('id,role,device,last_ok,created_at').eq('endpoint',s0.endpoint).maybeSingle();if(r.error)throw r.error;row=r.data;}
+      if(!row){var s1=await freshSub(reg);S.push.sub=s1;await saveSub(s1,devGet('pushRole',defaultRole()));S.push.healed=true;}
+      else S.push.row=row;
+    } else if(!s0) S.push.row=null;
+  }catch(e){S.push.err=(e&&e.message)||String(e);}
+  S.push.checked=new Date().toISOString();
   if(route().v==='settings')render();
 }
 function defaultRole(){var w=getWho();return w==='producer'||w==='host'?w:'all';}
 async function saveSub(s,role){
-  var r=await sb.from('push_subs').upsert({endpoint:s.endpoint,sub:s.toJSON(),email:((S.session.user&&S.session.user.email)||'').toLowerCase(),role:role,device:deviceName(),tz:(Intl.DateTimeFormat().resolvedOptions().timeZone||'')},{onConflict:'endpoint'}).select('id,role,device,last_ok').single();
+  var r=await sb.from('push_subs').upsert({endpoint:s.endpoint,sub:s.toJSON(),email:((S.session.user&&S.session.user.email)||'').toLowerCase(),role:role,device:deviceName(),tz:(Intl.DateTimeFormat().resolvedOptions().timeZone||'')},{onConflict:'endpoint'}).select('id,role,device,last_ok,created_at').single();
   if(r.error)throw r.error; S.push.row=r.data;
 }
 async function pushEnable(){
@@ -1018,7 +1029,7 @@ async function pushEnable(){
     var p=await Notification.requestPermission(); S.push.perm=p;
     if(p!=='granted'){S.push.msg=p==='denied'?'Notifications are blocked for this app. Open your phone’s Settings → Apps → Off The Map → Notifications, allow them, then come back.':'Notifications weren’t allowed. Tap the button again and choose Allow.';return;}
     var reg=await swReady();
-    var s=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUB)});
+    var s=await freshSub(reg); devSet('pushOff','');
     S.push.sub=s; await saveSub(s,devGet('pushRole',defaultRole()));
     var p0=P(); if(!p0.morning&&!p0.night&&!p0.weekly)setPrompts({morning:true,night:true,weekly:true,behind:true});
     toast('Notifications are on for this phone');
@@ -1027,7 +1038,7 @@ async function pushEnable(){
 }
 async function pushDisable(){
   S.push.busy=true;render();
-  try{var s=S.push.sub;if(s){if(sb)await sb.from('push_subs').delete().eq('endpoint',s.endpoint);await s.unsubscribe();}S.push.sub=null;S.push.row=null;toast('Notifications are off for this phone');}
+  try{devSet('pushOff','1');var s=S.push.sub;if(s){if(sb)await sb.from('push_subs').delete().eq('endpoint',s.endpoint);await s.unsubscribe();}S.push.sub=null;S.push.row=null;toast('Notifications are off for this phone');}
   catch(e){toast('Couldn’t turn them off. Try again.');}
   finally{S.push.busy=false;render();}
 }
@@ -1036,15 +1047,20 @@ async function pushRole(role){
   if(S.push.row&&sb){var r=await sb.from('push_subs').update({role:role}).eq('id',S.push.row.id);if(!r.error)S.push.row.role=role;else toast('Couldn’t save that. Try again.');}
   render();
 }
-async function pushSend(kind){
+async function pushSend(kind,retried){
   if(!sb||!S.session)return;
-  if(!S.push.sub){toast('Turn on notifications for this phone first.');return;}
-  toast('Sending…');
+  if(!S.push.sub||!S.push.row){ if(Notification.permission!=='granted'||!S.push.sub){await pushEnable();} else {await pushRefresh();} if(!S.push.sub)return; }
+  toast(retried?'Re-registered this phone. Sending again…':'Sending…');
   try{
     var r=await timed(sb.functions.invoke('otm-push',{body:kind?{action:'preview',kind:kind}:{action:'test'}}),20000);
-    if(r.error){var m='That didn’t send.';try{var j=await r.error.context.json();if(j&&j.error)m=j.error;}catch(_){}toast(m);return;}
-    if(kind&&!(r.data&&r.data.sent))toast({morning:'Nothing scheduled today, so there’s no morning reminder to send.',night:'Nothing scheduled tomorrow, so there’s no heads-up to send.',weekly:'Nothing scheduled this week yet.'}[kind]);
-    else toast('Sent. It should arrive in a few seconds.');
+    var d=r.data||{};
+    if(r.error){var m='That didn’t send.';try{var j=await r.error.context.json();if(j&&j.error)m=j.error;}catch(_){}
+      if(!retried&&/isn.t set up|not set up/i.test(m)){S.push.row=null;await pushRefresh();return pushSend(kind,true);}
+      toast(m);return;}
+    if(!kind&&!d.sent&&!retried){S.push.row=null;await pushRefresh();return pushSend(kind,true);}
+    if(kind&&!d.sent)toast({morning:'Nothing scheduled today, so there’s no morning reminder to send.',night:'Nothing scheduled tomorrow, so there’s no heads-up to send.',weekly:'Nothing scheduled this week yet.'}[kind]);
+    else if(!d.sent)toast('Google didn’t accept it. Turn notifications off and on again, then retry.');
+    else {toast('Sent. It should arrive in a few seconds. If it doesn’t, check that notifications for this app are allowed in Android settings.');pushRefresh();}
   }catch(e){toast('That didn’t send. Check your connection.');}
 }
 /* shared settings */
@@ -1080,14 +1096,21 @@ function sec(title,note,inner){return '<section class="setsec"><h2>'+title+'</h2
 function viewSettings(){
   var p=P(), ps=S.push, on=!!ps.sub, role=(ps.row&&ps.row.role)||devGet('pushRole',defaultRole());
   /* notifications on this phone */
+  var reg=!!(ps.row), perm=ps.perm;
   var nstat=!ps.supported?'This browser can’t receive notifications. Open the installed app from your home screen.':
-    ps.perm==='denied'?'Blocked. Allow notifications for Off The Map in your phone’s Settings → Apps → Off The Map → Notifications.':
-    on?'On'+(ps.row&&ps.row.last_ok?' · last delivered '+esc(fmt(ps.row.last_ok.slice(0,10)))+' '+esc(new Date(ps.row.last_ok).toTimeString().slice(0,5)):'')+'.':'Off. Turn them on to get reminders even when the app is closed.';
-  var n='<div class="item" style="flex-wrap:wrap;gap:10px"><span class="grow" style="min-width:180px"><span style="font-weight:600">'+esc(deviceName())+'</span><span class="small">'+nstat+'</span></span>'+
-    (ps.supported&&ps.perm!=='denied'?(on?'<button class="btn quiet" type="button" data-act="pushoff"'+(ps.busy?' disabled':'')+'>Turn off</button>':'<button class="btn" type="button" data-act="pushon"'+(ps.busy?' disabled':'')+'>'+(ps.busy?'Turning on…':'Turn on notifications')+'</button>'):'')+'</div>'+
+    perm==='denied'?'Blocked by Android. Open your phone’s Settings → Apps → Off The Map → Notifications and allow them.':
+    on&&reg?'On':'Off';
+  function chk(ok,label,detail){return '<div class="item chkrow"><span class="chk '+(ok?'ok':'no')+'" aria-hidden="true">'+(ok?'✓':'!')+'</span><span class="grow"><span style="font-weight:500">'+label+'</span>'+(detail?'<span class="small">'+detail+'</span>':'')+'</span></div>';}
+  var diag=chk(perm==='granted','Android permission',perm==='granted'?'Allowed':perm==='denied'?'Blocked in Android settings':'Not asked yet')+
+    chk(!!ps.sub,'This phone’s registration',ps.sub?'Active on this phone':'None yet')+
+    chk(reg,'Saved on the server',reg?('Since '+esc(fmt(String(ps.row.created_at||'').slice(0,10)))+(ps.row.last_ok?' · last delivered '+esc(fmt(ps.row.last_ok.slice(0,10)))+' '+esc(new Date(ps.row.last_ok).toTimeString().slice(0,5)):' · nothing delivered yet')):'Not registered');
+  var n='<div class="item" style="flex-wrap:wrap;gap:10px"><span class="grow" style="min-width:160px"><span style="font-weight:600">'+esc(deviceName())+'</span><span class="small">'+nstat+'</span></span>'+
+    (ps.supported&&perm!=='denied'?(on&&reg?'<button class="btn quiet" type="button" data-act="pushoff"'+(ps.busy?' disabled':'')+'>Turn off</button>':'<button class="btn" type="button" data-act="pushon"'+(ps.busy?' disabled':'')+'>'+(ps.busy?'Turning on…':'Turn on')+'</button>'):'')+'</div>'+
     (ps.msg?'<div class="item"><span class="small" style="color:var(--pin)">'+esc(ps.msg)+'</span></div>':'')+
-    (on?segRow('Whose tasks','Which tasks this phone is reminded about.','pushrole',role,[['all','Everyone']].concat(team().map(function(t){return [t.id,t.name];})))+
-      '<div class="item" style="flex-wrap:wrap;gap:8px"><span class="grow" style="min-width:140px"><span style="font-weight:500">Try it</span><span class="small">Sends to this person’s phones now.</span></span><div class="row" style="gap:6px;flex-wrap:wrap"><button class="chip" type="button" data-act="pushtest" data-k="">Test</button><button class="chip" type="button" data-act="pushtest" data-k="morning">Today</button><button class="chip" type="button" data-act="pushtest" data-k="night">Tomorrow</button><button class="chip" type="button" data-act="pushtest" data-k="weekly">Week</button></div></div>':'');
+    '<div class="item" style="flex-wrap:wrap;gap:10px"><span class="grow" style="min-width:140px"><span style="font-weight:600">Send a test</span><span class="small">Arrives within a few seconds.</span></span><button class="btn" type="button" data-act="pushtest" data-k=""'+(ps.supported&&perm!=='denied'?'':' disabled')+'>Test</button></div>'+
+    '<div class="item" style="flex-wrap:wrap;gap:8px"><span class="grow" style="min-width:140px"><span style="font-weight:500">Preview a reminder</span><span class="small">Sends today’s version now.</span></span><div class="row" style="gap:6px;flex-wrap:wrap"><button class="chip" type="button" data-act="pushtest" data-k="morning">Today</button><button class="chip" type="button" data-act="pushtest" data-k="night">Tomorrow</button><button class="chip" type="button" data-act="pushtest" data-k="weekly">Week</button></div></div>'+
+    (on&&reg?segRow('Whose tasks','Which tasks this phone is reminded about.','pushrole',role,[['all','Everyone']].concat(team().map(function(t){return [t.id,t.name];}))):'');
+  n+='</div><h3 class="sethd">Status</h3><div class="group">'+diag+'<div class="item"><span class="small">'+(ps.checked?'Checked '+esc(new Date(ps.checked).toTimeString().slice(0,5))+'. ':'')+'The app re-registers this phone on its own if Google expires it.</span><button class="linkbtn small" type="button" data-act="pushcheck" style="padding:0 6px">Check again</button></div>';
   /* reminder schedule (shared) */
   var dsel='<select class="set-in" data-set="prompts.weeklyDay" aria-label="Weekly review day">'+WEEK.map(function(x){return '<option'+((p.weeklyDay||'Sun')===x?' selected':'')+'>'+x+'</option>';}).join('')+'</select>';
   var tin=function(k,d,lab){return '<input type="time" class="set-in" data-set="prompts.'+k+'" value="'+esc(p[k]||d)+'" aria-label="'+lab+'">';};
@@ -1127,7 +1150,7 @@ function viewSettings(){
   var remSec='<div class="group">'+r+'</div><h3 class="sethd">Your reminders</h3>'+(S.ui.rem?remForm():'')+'<div class="group">'+custom+'</div>';
   var pp=P(), onCount=['morning','night','weekly'].filter(function(k){return pp[k];}).length;
   var secs=[
-    {k:'notifications',g:'This phone',t:'Notifications',ic:'M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4',sum:!ps.supported?'Not available here':ps.perm==='denied'?'Blocked':on?'On':'Off',note:'Reminders reach this phone even when the app is closed.',body:'<div class="group">'+n+'</div>'},
+    {k:'notifications',g:'This phone',t:'Notifications',ic:'M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4',sum:!ps.supported?'Not available here':ps.perm==='denied'?'Blocked':(on&&ps.row)?'On':'Off',note:'Reminders reach this phone even when the app is closed.',body:'<div class="group">'+n+'</div>'},
     {k:'display',g:'This phone',t:'Display',ic:'M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.5 1.5M16.5 16.5 18 18M6 18l1.5-1.5M16.5 7.5 18 6M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8',sum:({system:'Auto',light:'Light',dark:'Dark'})[devGet('theme','system')]+' theme',note:'Only changes this phone.',body:'<div class="group">'+disp+'</div>'},
     {k:'reminders',g:'Team',t:'Reminders',ic:'M12 7v5l3 2M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18',sum:onCount+' scheduled'+(vals(S.reminders).length?' · '+vals(S.reminders).length+' custom':''),note:'Shared by the team. Each phone only gets its own tasks.',body:remSec},
     {k:'claude',g:'Team',t:'Claude chats',ic:'M4 5h16v11H9l-5 4zM8 9.5h8M8 12.5h5',sum:claudeLinks().filter(function(l){return l.url;}).length+' linked',note:'Shortcuts in the chat button. Copy a chat’s link from Share in Claude.',body:'<div class="group">'+links+'</div>'},
@@ -1353,6 +1376,7 @@ document.addEventListener('click',function(ev){
   if(act==='pushoff'){pushDisable();return;}
   if(act==='pushrole'){pushRole(k);return;}
   if(act==='pushtest'){pushSend(k||'');return;}
+  if(act==='pushcheck'){pushRefresh().then(function(){toast(S.push.row?'This phone is registered.':'Not registered yet. Tap Turn on.');});return;}
   if(act==='theme'){devSet('theme',k);applyTheme();render();return;}
   if(act==='motion'){devSet('motion',devGet('motion','on')==='off'?'on':'off');render();return;}
   if(act==='bank'){var nb=Math.max(1,Math.min(20,target()+(+k)));setSettings({bankTarget:nb});return;}
@@ -1426,7 +1450,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='19';
+var APP_VERSION='20';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
@@ -1434,6 +1458,7 @@ render();
 start();
 /* Updates: check for a new version whenever the app comes back to the front, and reload into it automatically. */
 if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message',function(e){if(e.data&&e.data.type==='subchange'&&sb&&S.session){S.push.row=null;pushRefresh();}});
   var hadCtrl=!!navigator.serviceWorker.controller, reloading=false;
   navigator.serviceWorker.addEventListener('controllerchange',function(){if(!hadCtrl){hadCtrl=true;return;}if(reloading||PG.busy||S.ui.add)return;reloading=true;location.reload();});
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(reg){
