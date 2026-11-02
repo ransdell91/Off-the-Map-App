@@ -789,7 +789,7 @@ function shotsBlock(e,col){
 }
 function docsBlock(e){
   var docs=function(k,label){var u=(e.docs||{})[k];return '<'+(u?'a href="'+esc(u)+'" target="_blank" rel="noopener" data-tip="Open the '+label.toLowerCase()+' doc"':'div')+' class="item"><span class="thumb" style="background:var(--sand);color:var(--ink);font-size:14px;font-family:var(--f-mono)">'+(k==='research'?'R':'S')+'</span><span class="grow"><span style="font-weight:600">'+label+'</span><span class="small">'+(u?'Synced from Claude':'Not synced yet. In a project chat, ask Claude to sync it here.')+'</span></span>'+(u?svg(CHEV):'')+'</'+(u?'a':'div')+'>';};
-  return '<section style="display:flex;flex-direction:column;gap:8px"><p class="label">Docs · synced with Claude</p><div class="group">'+chatRow(e,e.status?'ideas':'episodes')+docs('research','Research notes')+docs('script','Script')+'</div>'+(e.notes?'<div class="card"><span class="label">Notes</span><span style="white-space:pre-wrap;font-size:14px">'+esc(e.notes)+'</span></div>':'')+'</section>';
+  return '<section style="display:flex;flex-direction:column;gap:8px"><p class="label">Docs · synced with Claude</p><div class="group">'+chatRow(e,e.status?'ideas':'episodes')+(e.drive?linkRow(e.drive,'Drive folder','Research, archive, audio and exports','D'):'')+docs('research','Research notes')+docs('script','Script')+'</div>'+(e.notes?'<div class="card"><span class="label">Notes</span><span style="white-space:pre-wrap;font-size:14px">'+esc(e.notes)+'</span></div>':'')+'</section>';
 }
 var TAB_TIP={overview:'Schedule, status and heads-up notes',shots:'The shot list for the trip',docs:'Research notes and script synced from Claude',tasks:'Every task tied to this one'};
 function tabChips(extra){
@@ -811,7 +811,7 @@ function episodeBody(e,inPane){
   var main={overview:sched+weekCard+flags,shots:shotsBlock(e,'episodes'),docs:docsBlock(e),tasks:tasksHtml}[tab]||'';
   var head=
     '<header style="display:flex;flex-direction:column;gap:6px"><div class="eyebrow">'+esc(series(e.series).name)+' · '+esc(tripName(e.trip))+'</div><h1 style="font-size:'+(inPane?'28px':'30px')+';line-height:1.12">'+esc(e.title)+'</h1><p class="sub" style="margin:0">'+esc(e.logline||e.hook)+'</p></header>'+
-    '<ol class="steps" aria-label="Stage: '+STAGE_NAME[p]+'">'+steps+'</ol><div class="small" style="margin-top:-8px"><strong style="color:var(--link)">'+STAGE_NAME[p]+'</strong> · episode '+String(e.prod).padStart(2,'0')+' of '+eps().length+'</div>'+tabChips(e.chat?'<a class="chip go" href="'+esc(e.chat)+'" target="_blank" rel="noopener" data-tip="Open this episode’s chat in Claude">Claude chat ↗</a>':'');
+    '<ol class="steps" aria-label="Stage: '+STAGE_NAME[p]+'">'+steps+'</ol><div class="small" style="margin-top:-8px"><strong style="color:var(--link)">'+STAGE_NAME[p]+'</strong> · episode '+String(e.prod).padStart(2,'0')+' of '+eps().length+'</div>'+tabChips((e.drive?'<a class="chip" href="'+esc(e.drive)+'" target="_blank" rel="noopener" data-tip="Open this episode’s folder in Google Drive">Files ↗</a>':'')+(e.chat?'<a class="chip go" href="'+esc(e.chat)+'" target="_blank" rel="noopener" data-tip="Open this episode’s chat in Claude">Claude chat ↗</a>':''));
   return '<div class="epbody">'+head+'<div class="epcols'+(tab==='overview'?'':' nonov')+'"><div>'+main+'</div><div class="side">'+gateBlock(e,'episodes')+(tab!=='docs'?docsBlock(e):'')+'</div></div></div>';
 }
 function viewEpisode(id){
@@ -924,7 +924,7 @@ function topbarHtml(r){
   var onSet=r.v==='settings';
   return '<div class="tb-in">'+(back?'<a class="iconbtn tb-back" href="'+back[0]+'" aria-label="Back to '+back[1]+'" data-tip="Back to '+back[1]+'">'+svg('M15 5l-7 7 7 7','')+'</a>':'')+
     '<div class="tb-titles"><div class="eyebrow">'+esc(eb)+'</div><h1 class="tb-title">'+esc(t)+'</h1></div>'+
-    '<div class="tb-act">'+claudeBtn()+bellBtn()+'<button class="iconbtn" type="button" data-act="settings" aria-pressed="'+onSet+'" aria-label="Settings" data-tip="'+(onSet?'Close settings':'Settings: notifications, reminders, display and account')+'">'+GEAR_SVG+'</button></div></div>';
+    '<div class="tb-act">'+driveBtn()+claudeBtn()+bellBtn()+'<button class="iconbtn" type="button" data-act="settings" aria-pressed="'+onSet+'" aria-label="Settings" data-tip="'+(onSet?'Close settings':'Settings: notifications, reminders, display and account')+'">'+GEAR_SVG+'</button></div></div>';
 }
 /* ---------- Claude chats ---------- */
 var DEFAULT_LINKS=[{id:'project',name:'Off The Map CA project',url:'',note:'The project page: every chat and file'},{id:'appdev',name:'OTM App Developer',url:'https://claude.ai/code/session_01SeKF9eavJ12HGTuzXuskiY',note:'Changes, fixes and new features for this app'}];
@@ -932,6 +932,9 @@ function claudeLinks(){return (S.settings&&Array.isArray(S.settings.claudeLinks)
 function saveLinks(list,msg){if(!S.settings)return;S.settings=Object.assign({},S.settings,{claudeLinks:list});render();write('config/settings',{claudeLinks:list},msg);}
 function okUrl(u){return /^https:\/\/\S+$/i.test(u||'');}
 var CHAT_SVG='<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>';
+var FOLDER_SVG='<svg viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></svg>';
+function drive(){return (S.settings&&S.settings.drive)||{};}
+function driveBtn(){var u=drive().root;return u?'<a class="iconbtn" href="'+esc(u)+'" target="_blank" rel="noopener" aria-label="Off the Map files in Google Drive" data-tip="Open the Off the Map folder in Google Drive">'+FOLDER_SVG+'</a>':'';}
 function claudeBtn(){return '<button class="iconbtn" type="button" data-act="claude" aria-label="Claude chats" data-tip="Open your Claude chats: the project, this app’s chat and each episode’s chat">'+CHAT_SVG+'</button>';}
 function linkRow(href,title,sub,mono){
   return href?'<a class="item" href="'+esc(href)+'" target="_blank" rel="noopener" data-tip="Open '+esc(title)+' in Claude"><span class="thumb" style="background:var(--deep);color:var(--deep-fg);font-family:var(--f-mono);font-size:13px">'+esc(mono)+'</span><span class="grow"><span style="font-weight:600">'+esc(title)+'</span><span class="small">'+esc(sub)+'</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></a>'
@@ -945,8 +948,8 @@ function claudeSheet(){
   var epRows=eps().filter(function(e){return e.chat||active.indexOf(e)>=0;}).sort(function(a,b){return a.prod-b.prod;}).map(function(e){
     return e.chat?linkRow(e.chat,shortName(e),'Episode '+String(e.prod).padStart(2,'0')+' chat',String(e.prod).padStart(2,'0')):
       '<a class="item" href="#episode-'+esc(e.id)+'" data-act="closeclaude" data-tip="Open this episode to add its chat link"><span class="thumb" style="background:var(--sand);color:var(--muted);font-family:var(--f-mono);font-size:13px">'+String(e.prod).padStart(2,'0')+'</span><span class="grow"><span style="font-weight:600">'+esc(shortName(e))+'</span><span class="small">In progress · no chat linked yet. Tap to add one on the Docs tab.</span></span></a>';}).join('');
-  return '<div class="scrim" data-act="closeclaude"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cl-t" style="display:flex;flex-direction:column;gap:14px"><div class="grab"></div><div class="row" style="justify-content:space-between"><h2 id="cl-t" style="font-size:20px">Claude</h2><button type="button" class="btn quiet" data-act="closeclaude" style="border:0;background:transparent;color:var(--link);padding:0">Done</button></div>'+
-    '<div class="group">'+shared+'</div>'+
+  return '<div class="scrim" data-act="closeclaude"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cl-t" style="display:flex;flex-direction:column;gap:14px"><div class="grab"></div><div class="row" style="justify-content:space-between"><h2 id="cl-t" style="font-size:20px">Links</h2><button type="button" class="btn quiet" data-act="closeclaude" style="border:0;background:transparent;color:var(--link);padding:0">Done</button></div>'+
+    '<div class="group">'+shared+'</div>'+(drive().root?'<p class="label" style="margin:2px 0 -6px">Google Drive</p><div class="group">'+linkRow(drive().root,'Off the Map folder','Everything, in the company Drive','D')+(drive().channel?linkRow(drive().channel,'Channel','Brand, templates, music, thumbnails','D'):'')+(drive().readme?linkRow(drive().readme,'How we file things','Folder layout and naming rules','?'):'')+'</div>':'')+
     '<p class="label" style="margin:2px 0 -6px">Episode chats</p>'+(epRows?'<div class="group">'+epRows+'</div>':'<div class="empty" style="padding:16px">Link an episode’s chat from its Docs tab and it shows up here.</div>')+
     '<a class="linkbtn small" href="#settings-claude" data-act="closeclaude" style="align-self:flex-start">Edit links in Settings</a></div></div>';
 }
@@ -1423,7 +1426,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='18';
+var APP_VERSION='19';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
