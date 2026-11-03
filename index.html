@@ -932,7 +932,7 @@ function topbarHtml(r){
   else if(r.v==='idea'){var i=S.ideas[r.id],qp=i?queuePos(i):0;back=qp?['#queue','Queue']:['#ideas','Ideas'];t=i?i.title:'Idea';eb=i?series(i.series).name:'Ideas';}
   else if(r.v==='trips'){t='Trips';eb='One trip · several episodes';}
   else if(r.v==='prompts'){t='Prompts';eb='Reminders, kept here';back=['#today','Today'];}
-  else if(r.v==='settings'){var SN={notifications:'Notifications',display:'Display',reminders:'Reminders',claude:'Claude chats',production:'Production',data:'Data & sync',account:'Account'};if(r.sec&&SN[r.sec]&&!wide()){t=SN[r.sec];eb='Settings';back=['#settings','Settings'];}else{t='Settings';eb='Off The Map · production';}}
+  else if(r.v==='settings'){var SN={notifications:'Notifications & reminders',reminders:'Notifications & reminders',display:'Display',reminders:'Reminders',claude:'Claude chats',production:'Production',data:'Data & sync',account:'Account'};if(r.sec&&SN[r.sec]&&!wide()){t=SN[r.sec];eb='Settings';back=['#settings','Settings'];}else{t='Settings';eb='Off The Map · production';}}
   var onSet=r.v==='settings';
   return '<div class="tb-in">'+(back?'<a class="iconbtn tb-back" href="'+back[0]+'" aria-label="Back to '+back[1]+'" data-tip="Back to '+back[1]+'">'+svg('M15 5l-7 7 7 7','')+'</a>':'')+
     '<div class="tb-titles"><div class="eyebrow">'+esc(eb)+'</div><h1 class="tb-title">'+esc(t)+'</h1></div>'+
@@ -1135,7 +1135,7 @@ function viewSettings(){
     '<div class="item" style="flex-wrap:wrap;gap:10px"><span class="grow" style="min-width:140px"><span style="font-weight:600">Send a test</span><span class="small">Arrives within a few seconds.</span></span><button class="btn" type="button" data-act="pushtest" data-k=""'+(ps.supported&&perm!=='denied'?'':' disabled')+'>Test</button></div>'+
     '<div class="item" style="flex-wrap:wrap;gap:8px"><span class="grow" style="min-width:140px"><span style="font-weight:500">Preview a reminder</span><span class="small">Sends today’s version now.</span></span><div class="row" style="gap:6px;flex-wrap:wrap"><button class="chip" type="button" data-act="pushtest" data-k="morning">Today</button><button class="chip" type="button" data-act="pushtest" data-k="night">Tomorrow</button><button class="chip" type="button" data-act="pushtest" data-k="weekly">Week</button></div></div>'+
     (on&&reg?segRow('Whose tasks','Which tasks this phone is reminded about.','pushrole',role,[['all','Everyone']].concat(team().map(function(t){return [t.id,t.name];}))):'');
-  n+='</div><h3 class="sethd">Status</h3><div class="group">'+diag+'<div class="item"><span class="small">'+(ps.checked?'Checked '+esc(new Date(ps.checked).toTimeString().slice(0,5))+'. ':'')+'The app re-registers this phone on its own if Google expires it.</span><button class="linkbtn small" type="button" data-act="pushcheck" style="padding:0 6px">Check again</button></div>';
+  var nStatus='<h3 class="sethd">Status</h3><div class="group">'+diag+'<div class="item"><span class="small">'+(ps.checked?'Checked '+esc(new Date(ps.checked).toTimeString().slice(0,5))+'. ':'')+'The app re-registers this phone on its own if Google expires it.</span><button class="linkbtn small" type="button" data-act="pushcheck" style="padding:0 6px">Check again</button></div></div>';
   /* reminder schedule (shared) */
   var dsel='<select class="set-in" data-set="prompts.weeklyDay" aria-label="Weekly review day">'+WEEK.map(function(x){return '<option'+((p.weeklyDay||'Sun')===x?' selected':'')+'>'+x+'</option>';}).join('')+'</select>';
   var tin=function(k,d,lab){return '<input type="time" class="set-in" data-set="prompts.'+k+'" value="'+esc(p[k]||d)+'" aria-label="'+lab+'">';};
@@ -1176,15 +1176,14 @@ function viewSettings(){
   var remSec='<div class="group">'+r+'</div><h3 class="sethd">Your reminders</h3>'+(S.ui.rem?remForm():'')+'<div class="group">'+custom+'</div>';
   var pp=P(), onCount=['morning','night','weekly'].filter(function(k){return pp[k];}).length;
   var secs=[
-    {k:'notifications',g:'This phone',t:'Notifications',ic:'M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4',sum:!ps.supported?'Not available here':ps.perm==='denied'?'Blocked':(on&&ps.row)?'On':'Off',note:'Reminders reach this phone even when the app is closed.',body:'<div class="group">'+n+'</div>'},
+    {k:'notifications',g:'Reminders',t:'Notifications & reminders',ic:'M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4',sum:(!ps.supported?'Not available':ps.perm==='denied'?'Blocked':(on&&ps.row)?'On':'Off'),note:'Reminders reach this phone even when the app is closed. The schedule is shared; each phone only gets its own tasks.',body:'<div class="group">'+n+'</div><h3 class="sethd">Schedule</h3>'+remSec+nStatus},
     {k:'display',g:'This phone',t:'Display',ic:'M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.5 1.5M16.5 16.5 18 18M6 18l1.5-1.5M16.5 7.5 18 6M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8',sum:({system:'Auto',light:'Light',dark:'Dark'})[devGet('theme','system')]+' theme',note:'Only changes this phone.',body:'<div class="group">'+disp+'</div>'},
-    {k:'reminders',g:'Team',t:'Reminders',ic:'M12 7v5l3 2M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18',sum:onCount+' scheduled'+(vals(S.reminders).length?' · '+vals(S.reminders).length+' custom':''),note:'Shared by the team. Each phone only gets its own tasks.',body:remSec},
     {k:'claude',g:'Team',t:'Claude chats',ic:'M4 5h16v11H9l-5 4zM8 9.5h8M8 12.5h5',sum:claudeLinks().filter(function(l){return l.url;}).length+' linked',note:'Shortcuts in the chat button. Copy a chat’s link from Share in Claude.',body:'<div class="group">'+links+'</div>'},
     {k:'production',g:'Team',t:'Production',ic:'M5 21V4h11l-2 4 2 4H5',sum:'Launch '+fmt((S.settings&&S.settings.launch)||'2027-02-19',false),note:'Shared by the team.',body:'<div class="group">'+prod+'</div>'},
     {k:'data',g:'Account',t:'Data & sync',ic:'M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5',sum:n0?n0+' waiting':'All saved',note:'',body:'<div class="group">'+data+'</div>'},
     {k:'account',g:'Account',t:'Account',ic:'M12 12a4 4 0 1 0 0-8a4 4 0 1 0 0 8M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6',sum:'Version '+APP_VERSION,note:'',body:'<div class="group">'+acct+'</div>'}
   ];
-  var cur=route().sec, curSec=secs.filter(function(x){return x.k===cur;})[0];
+  var cur=route().sec; if(cur==='reminders')cur='notifications'; var curSec=secs.filter(function(x){return x.k===cur;})[0];
   var w=wide(); if(w&&!curSec)curSec=secs[0];
   var menu='', lastG='';
   secs.forEach(function(x){
@@ -1478,7 +1477,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='21';
+var APP_VERSION='22';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
