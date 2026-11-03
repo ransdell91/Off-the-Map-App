@@ -13,7 +13,7 @@
   --info-bg:#DCE6EC; --info-fg:#1E3F57; --field:#FFFFFF;
   --red:#943F31; --pin:#B2503F; --pin-bright:#D0654F; --good:#7FA88A;
   --line:rgba(42,36,28,.12); --line-strong:rgba(42,36,28,.28); --scrim:rgba(36,30,22,.5);
-  --c-research:#D9B95B; --c-script:#9FBBD3; --c-prepro:#2C5878; --c-shoot:#B2503F; --c-ae:#8DB89A; --c-edit:#3E5C46; --c-release:#D98A3D; --c-other:#B9B39E;
+  --c-writing:#C9A44A; --c-making:#4F7A5C; --c-shoot:#B2503F; --c-release:#D98A3D; --c-other:#B9B39E;
   --f-display:'Zilla Slab', Rockwell, 'Roboto Slab', Georgia, serif;
   --f-body:'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f-mono:'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
@@ -29,7 +29,7 @@
   --info-bg:#1F3242; --info-fg:#B4D0E6; --field:#263329;
   --red:#A84A3B; --pin:#C85A47; --pin-bright:#D0654F; --good:#7FA88A;
   --line:rgba(237,227,200,.12); --line-strong:rgba(237,227,200,.28); --scrim:rgba(0,0,0,.6);
-  --c-research:#B8973C; --c-script:#5F86A8; --c-prepro:#36678C; --c-shoot:#B34A39; --c-ae:#5E8E6C; --c-edit:#4E7A5B; --c-release:#B8722F; --c-other:#6E6A5C;
+  --c-writing:#C2A04A; --c-making:#6E9C7B; --c-shoot:#C0533F; --c-release:#D08A45; --c-other:#5E5A4E;
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
@@ -41,7 +41,7 @@
   --info-bg:#1F3242; --info-fg:#B4D0E6; --field:#263329;
   --red:#A84A3B; --pin:#C85A47; --pin-bright:#D0654F; --good:#7FA88A;
   --line:rgba(237,227,200,.12); --line-strong:rgba(237,227,200,.28); --scrim:rgba(0,0,0,.6);
-  --c-research:#B8973C; --c-script:#5F86A8; --c-prepro:#36678C; --c-shoot:#B34A39; --c-ae:#5E8E6C; --c-edit:#4E7A5B; --c-release:#B8722F; --c-other:#6E6A5C;
+  --c-writing:#C2A04A; --c-making:#6E9C7B; --c-shoot:#C0533F; --c-release:#D08A45; --c-other:#5E5A4E;
   color-scheme:dark;
 }
 html,body{height:100%}
@@ -311,15 +311,22 @@ button.day{border:0;font:inherit;cursor:pointer;background:transparent}
 .cell.sel{outline:2px solid var(--ink);outline-offset:-1px}
 .cell .n{font-weight:600;font-size:14px;font-variant-numeric:tabular-nums;line-height:20px;min-width:20px;text-align:center}
 .cell.now .n{background:var(--accent);color:var(--on-accent);border-radius:7px;padding:0 5px}
-.cell.tinted{border-color:transparent}
-.cell.tinted .n,.cell.tinted .cnt{background:var(--surface);color:var(--ink);border-radius:7px;padding:0 5px}
-.cell.tinted.now .n{background:var(--ink);color:var(--bg)}
-.cell .cnt{top:auto;right:auto;bottom:5px;left:5px}
-.cell.tinted .cnt{line-height:17px}
-.legend i.sw{width:12px;height:12px;border-radius:4px;display:inline-block;flex:none;vertical-align:-1px;margin-right:2px}
+.cell .dbar{position:absolute;left:7px;right:7px;bottom:7px;height:4px;border-radius:2px}
+.cell.shoot{background:var(--c-shoot);border-color:transparent;color:#FFFFFF}
+.cell.now{box-shadow:inset 0 0 0 2px var(--accent)}
+.cell.now .n{background:transparent;color:inherit;padding:0}
+.cell.sel{outline:none;background:var(--ink);color:var(--bg);border-color:transparent}
+.cell.sel .dbar{box-shadow:0 0 0 2px var(--ink)}
+.cell .relmk{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--c-release)}
+.cell .cnt{top:auto;bottom:14px;left:auto;right:6px}
+.cell .cnt.over{color:var(--pin)}
+.cell.sel .cnt.over,.cell.shoot .cnt.over{color:#FFFFFF}
+.legend i.sw{width:14px;height:4px;border-radius:2px;display:inline-block;flex:none;vertical-align:middle;margin-right:4px}
+.legend i.sw.sq{width:12px;height:12px;border-radius:4px;vertical-align:-1px}
+.legend i.sw.rel{width:7px;height:7px;border-radius:50%;vertical-align:1px}
 .cell .mk i,.kdot,.legend i[class^="k-"]{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
 .cnt{position:absolute;top:6px;right:6px;font-family:var(--f-mono);font-size:10.5px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
-.k-shoot{background:var(--c-shoot)} .k-release{background:var(--c-release)} .k-bank{background:var(--c-edit)} .k-start{background:var(--c-research)}
+.k-shoot{background:var(--c-shoot)} .k-release{background:var(--c-release)} .k-bank{background:var(--c-making)} .k-start{background:var(--c-writing)}
 .legend .lg-prod{background:var(--surface);border:1px solid var(--line-strong)}
 @media (max-width:420px){.cell{min-height:56px;padding:4px}.cell .cnt{bottom:4px;left:4px}}
 @media (min-width:600px){.cal-cols{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}}
@@ -730,9 +737,9 @@ function calEvents(from,to){
   return ev;
 }
 var KIND_NAME={shoot:'Shoot',bank:'Banked',release:'Release',start:'Episode starts'};
-var CAT_ORDER=['research','script','prepro','shoot','ae','edit','release','other'];
-var CAT_NAME={research:'Research',script:'Script',prepro:'Pre-pro',shoot:'Shoot',ae:'Assistant edit',edit:'Edit',release:'Release',other:'Setup & outreach'};
-function taskCat(t){return ({'Research':'research','Script':'script','Pre-production':'prepro','Shoot':'shoot','Assistant edit':'ae','Edit':'edit','Release':'release'})[t.stage]||'other';}
+var CAT_ORDER=['writing','making','shoot','release','other'];
+var CAT_NAME={writing:'Writing',making:'Making',shoot:'Shoot',release:'Release',other:'Setup'};
+function taskCat(t){return ({'Research':'writing','Script':'writing','Pre-production':'making','Assistant edit':'making','Edit':'making','Shoot':'shoot','Release':'release'})[t.stage]||'other';}
 function viewCalendar(){
   var real=today(), sel=S.ui.day||real, m=S.ui.calMonth||(sel.slice(0,8)+'01');
   var first=pd(m), last=ds(new Date(first.getFullYear(),first.getMonth()+1,0));
@@ -743,15 +750,17 @@ function viewCalendar(){
   for(var x=gs;x<=ge;x=addD(x,1)){
     var r=roleFor(x), e=ev[x]||[], c=counts[x]||0, inM=x.slice(0,7)===m.slice(0,7);
     var tip=fmt(x)+(r?' · '+r.name:' · Off day')+(e.length?' · '+e.map(function(z){return z.label;}).join(', '):'')+(c?' · '+hrs(c)+' of tasks'+(S.ui.who==='all'?' (everyone)':''):'')+'. Tap to open this day.';
-    var cs=CAT_ORDER.filter(function(k){return cats[x]&&cats[x][k];}), bg='';
-    if(cs.length){var w=100/cs.length;bg=' style="background:linear-gradient(90deg,'+cs.map(function(k,i){return 'var(--c-'+k+') '+(i*w).toFixed(2)+'% '+((i+1)*w).toFixed(2)+'%';}).join(',')+')"';tip=tip.replace('. Tap',' · '+cs.map(function(k){return CAT_NAME[k];}).join(', ')+'. Tap');}
-    cells+='<button type="button" class="cell'+(inM?'':' out')+(r?' prod':'')+(cs.length?' tinted':'')+(x===sel?' sel':'')+(x===real?' now':'')+'" data-act="pickday" data-k="'+x+'" aria-label="'+esc(tip)+'" data-tip="'+esc(tip)+'"'+bg+'><span class="n">'+pd(x).getDate()+'</span>'+(c?'<span class="cnt'+(c>240&&S.ui.who!=='all'?' over':'')+'">'+hrs(c)+'</span>':'')+'</button>';
+    var cs=CAT_ORDER.filter(function(k){return cats[x]&&cats[x][k];}), bar='', isShoot=cs.indexOf('shoot')>=0, isRel=cs.indexOf('release')>=0, over=c>240&&S.ui.who!=='all';
+    var bs=cs.filter(function(k){return k!=='shoot';});
+    if(bs.length&&!isShoot){var w=100/bs.length;bar='<span class="dbar" style="background:linear-gradient(90deg,'+bs.map(function(k,i){return 'var(--c-'+k+') '+(i*w).toFixed(2)+'% '+((i+1)*w).toFixed(2)+'%';}).join(',')+')"></span>';}
+    if(cs.length)tip=tip.replace('. Tap',' · '+cs.map(function(k){return CAT_NAME[k];}).join(', ')+'. Tap');
+    cells+='<button type="button" class="cell'+(inM?'':' out')+(r?' prod':'')+(isShoot?' shoot':'')+(x===sel?' sel':'')+(x===real?' now':'')+'" data-act="pickday" data-k="'+x+'" aria-label="'+esc(tip)+'" data-tip="'+esc(tip)+'"><span class="n">'+pd(x).getDate()+'</span>'+(isRel?'<span class="relmk" aria-hidden="true"></span>':'')+(over?'<span class="cnt over">'+hrs(c)+'</span>':'')+bar+'</button>';
   }
   var agenda=[];for(var y=m;y<=last;y=addD(y,1))(ev[y]||[]).forEach(function(z){agenda.push({d:y,z:z});});
   var seen={},list=agenda.filter(function(a){var key=a.z.label;if(a.z.k==='shoot'){if(seen[key])return false;seen[key]=1;}return true;});
   var agendaHtml=list.length?'<div class="group">'+list.map(function(a){return '<a class="item" href="'+esc(a.z.href)+'" data-tip="'+esc('Open '+a.z.label.replace(/^Shoot: /,'')) +'"><span class="mono small" style="width:64px;flex:none">'+esc(fmt(a.d,false))+'</span><span class="grow"><span style="font-weight:600">'+esc(a.z.label)+'</span><span class="small">'+esc(KIND_NAME[a.z.k])+'</span></span><i class="kdot k-'+a.z.k+'" aria-hidden="true"></i></a>';}).join('')+'</div>':'<div class="empty">No shoots, banks or releases this month.</div>';
   var title=MON[first.getMonth()]+' '+first.getFullYear();
-  var legend='<div class="legend">'+CAT_ORDER.map(function(k){return '<span><i class="sw" style="background:var(--c-'+k+')"></i>'+CAT_NAME[k]+'</span>';}).join('')+'<span><i class="sw lg-prod"></i>Production day, no tasks</span><span><b class="cnt" style="position:static">3h</b> Planned time</span></div>';
+  var legend='<div class="legend">'+CAT_ORDER.map(function(k){return '<span><i class="sw'+(k==='shoot'?' sq':'')+(k==='release'?' rel':'')+'" style="background:var(--c-'+k+')"></i>'+CAT_NAME[k]+'</span>';}).join('')+'</div>';
   return '<div class="wrap"><div class="dayhead"><div class="row" style="justify-content:space-between;gap:4px"><div class="daynav"><button class="iconbtn" type="button" data-act="calmonth" data-k="-1" aria-label="Previous month" data-tip="Previous month. You can also swipe right.">'+svg('M15 5l-7 7 7 7','')+'</button><h2 class="big" style="min-width:150px;text-align:center">'+esc(title)+'</h2><button class="iconbtn" type="button" data-act="calmonth" data-k="1" aria-label="Next month" data-tip="Next month. You can also swipe left.">'+svg('M9 5l7 7-7 7','')+'</button></div><span class="row" style="gap:4px">'+(m.slice(0,7)!==real.slice(0,7)?'<button class="btn quiet sm" type="button" data-act="calmonth" data-k="0" data-tip="Jump back to this month">This month</button>':'')+'</span></div></div>'+
     todaySeg('cal')+ticker(real)+statusBanner()+
     '<div class="cols cal-cols"><div><div class="cal" role="group" aria-label="'+esc(title)+'">'+head+cells+'</div>'+legend+'</div><div><section style="display:flex;flex-direction:column;gap:8px"><h2>This month</h2>'+agendaHtml+'</section></div></div></div>';
@@ -1491,7 +1500,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='1.24';
+var APP_VERSION='1.25';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
