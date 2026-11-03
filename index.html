@@ -946,8 +946,9 @@ function okUrl(u){return /^https:\/\/\S+$/i.test(u||'');}
 var CHAT_SVG='<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>';
 var FOLDER_SVG='<svg viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></svg>';
 function drive(){return (S.settings&&S.settings.drive)||{};}
-/* Open Drive links in the Google account this person signed into the app with. */
-function driveAcct(){return devGet('driveAcct','')||((S.session&&S.session.user&&S.session.user.email)||'');}
+/* Drive links always open in the production company's Google account. */
+var DRIVE_ACCOUNT='contact@ramediapro.co'; /* the production company's Google Drive */
+function driveAcct(){return (S.settings&&S.settings.driveAccount)||DRIVE_ACCOUNT;}
 function dl(u){if(!u)return u;var a=driveAcct();if(!a)return u;var x=u.replace(/([?&])authuser=[^&]*/,'$1').replace(/[?&]$/,'');return x+(x.indexOf('?')>=0?'&':'?')+'authuser='+encodeURIComponent(a);}
 function driveBtn(){return drive().root?'<button class="iconbtn" type="button" data-act="files" aria-label="Files" data-tip="Your Off the Map folders in Google Drive">'+FOLDER_SVG+'</button>':'';}
 function claudeBtn(){return '<button class="iconbtn" type="button" data-act="claude" aria-label="Claude chats" data-tip="Open your Claude chats: the project, this app’s chat and each episode’s chat">'+CHAT_SVG+'</button>';}
@@ -1155,11 +1156,11 @@ function viewSettings(){
   var disp=segRow('Theme','','theme',devGet('theme','system'),[['system','Auto'],['light','Light'],['dark','Dark']])+
     segRow('Show tasks for','Filters Today and the calendar.','who',getWho(),[['all','Everyone']].concat(team().map(function(t){return [t.id,t.name];})))+
     '<div class="item"><span class="grow"><span style="font-weight:500">Open to</span><span class="small">The first screen when you launch the app.</span></span><select class="set-in" data-dev="start" aria-label="Open to">'+startOpts.map(function(o){return '<option value="'+o[0]+'"'+(devGet('start','today')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'+
-    '<div class="item" style="flex-wrap:wrap;gap:8px"><span class="grow" style="min-width:160px"><span style="font-weight:500">Google account for Drive</span><span class="small">Folder links open in this account.</span></span><input class="set-in" type="email" inputmode="email" data-dev="driveAcct" value="'+esc(devGet('driveAcct',''))+'" placeholder="'+esc((S.session&&S.session.user&&S.session.user.email)||'you@example.com')+'" style="flex:1 1 200px" aria-label="Google account for Drive"></div>'+
     swRow(devGet('motion','on')!=='off','motion','','Slide animations','Page slides when you swipe between days and months.');
   /* production (shared) */
   var st=S.settings||{};
   var prod='<div class="item"><span class="grow"><span style="font-weight:500">Launch date</span><span class="small">First release. Countdowns use this.</span></span><input type="date" class="set-in" data-set="launch" value="'+esc(st.launch||'')+'" aria-label="Launch date"></div>'+
+    '<div class="item"><span class="grow"><span style="font-weight:500">Google Drive account</span><span class="small">Every Files link opens in this account.</span></span><span class="small mono">'+esc(driveAcct())+'</span></div>'+
     '<div class="item"><span class="grow"><span style="font-weight:500">Bank before launch</span><span class="small">Episodes finished before the first release.</span></span><span class="row" style="gap:6px"><button class="iconbtn" type="button" data-act="bank" data-k="-1" aria-label="Fewer">−</button><span class="mono" style="min-width:24px;text-align:center;font-size:16px">'+target()+'</span><button class="iconbtn" type="button" data-act="bank" data-k="1" aria-label="More">+</button></span></div>'+
     team().map(function(t){return '<div class="item"><span class="grow"><span style="font-weight:500">'+(t.id==='producer'?'Producer’s name':t.id==='host'?'Host’s name':'Name')+'</span><span class="small">Shown on tasks and filters.</span></span><input class="set-in" data-team="'+esc(t.id)+'" value="'+esc(t.name)+'" maxlength="24" style="width:140px" aria-label="Name for '+esc(t.id)+'"></div>';}).join('')+
     '<div class="item"><span class="grow"><span style="font-weight:500">Schedule pattern</span><span class="small">'+esc(((st.productionDays||['Mon','Thu','Fri','Sat']).join(', ')))+' · '+(st.cycleWeeks||4)+'-week episodes, '+(st.inFlight||2)+' at a time · releases every '+((st.cadenceWeeks||2)===1?'':(st.cadenceWeeks||2)+' ')+'week'+((st.cadenceWeeks||2)===1?'':'s')+' on '+esc(st.releaseDay||'Friday')+'. Ask Claude in your project chat to change this; it reschedules the tasks for you.</span></span></div>';
@@ -1477,7 +1478,7 @@ document.addEventListener('keydown',function(ev){
 window.addEventListener('hashchange',function(){S.ui.epTab='overview';hideTip();render();var m=document.getElementById('main');if(m)m.scrollTop=0;});
 var lastWide=null;window.addEventListener('resize',function(){var w=wide();if(w!==lastWide){lastWide=w;render();}});
 lastWide=wide();
-var APP_VERSION='22';
+var APP_VERSION='23';
 S.ui.who=getWho();
 applyTheme();
 startScreen();
