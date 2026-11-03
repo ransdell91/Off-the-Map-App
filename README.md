@@ -1,3 +1,5 @@
+> **Moved.** This app now lives inside the R&A app: https://ransdell91.github.io/RA-Media-App/ (repo `ransdell91/RA-Media-App`). This repo only redirects there.
+
 # Off The Map Production
 
 The production planner for the Off The Map California channel, as an installable web app.
